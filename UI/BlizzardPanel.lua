@@ -55,6 +55,7 @@ function ns:RegisterBlizzardOptions()
     optionsPanel.refreshText = function()
         desc:SetText(ns:L("PANEL_DESC"))
         open.label:SetText(ns:L("PANEL_OPEN"))
+        ns.UIKit:FitFontString(open.label, 212, 1)
         hint:SetText(ns:L("PANEL_HINT"))
     end
     optionsPanel:SetScript("OnShow", optionsPanel.refreshText)

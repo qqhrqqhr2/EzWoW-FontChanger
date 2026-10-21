@@ -142,11 +142,12 @@ function SettingsDialog.refreshTestWindow()
     testFrame.hint:SetText(ns:L("TEST_HINT"))
     testFrame.inputLabel:SetText(ns:L("TEST_INPUT"))
     local entry = ns:ResolveFont(ns:TargetConfig(testTargetKey).font)
-    testFrame.targetButton.label:SetText(string.format(ns:L("TEST_TARGET"), ns:L("TARGET_" .. testTargetKey), entry and entry.name or ns:L("FONT_DEFAULT")))
+    SettingsDialog.setButtonText(testFrame.targetButton, string.format(ns:L("TEST_TARGET"), ns:L("TARGET_" .. testTargetKey), entry and entry.name or ns:L("FONT_DEFAULT")))
     local singleFile = testTargetKey == "combat" or testTargetKey == "nameplate"
     for index, line in ipairs(TEST_LINES) do
         local row = testFrame.rows[index]
         row.label:SetText(ns:L("LANG_" .. line.key))
+        ns.UIKit:FitFontString(row.label, 78, 1)
         SettingsDialog.renderTargetFont(row.sample, testTargetKey)
         row.sample:SetText(line.sample)
         local drawingEntry = SettingsDialog.testEntryFor(testTargetKey, line)
@@ -159,6 +160,7 @@ function SettingsDialog.refreshTestWindow()
         end
         local statusText, color = SettingsDialog.testStatus(drawingEntry, line.key)
         row.status:SetText(statusText)
+        ns.UIKit:FitFontString(row.status, 76, 1)
         row.status:SetTextColor(color[1], color[2], color[3])
     end
     SettingsDialog.refreshTestPreview()

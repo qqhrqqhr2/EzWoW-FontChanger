@@ -33,10 +33,17 @@ function SettingsDialog.createButton(parent, width, height, text, onClick)
     end
     button.label:SetWordWrap(false)
     button.label:SetText(text or "")
+    button.fitWidth = width >= 40 and width - 16 or nil
     button:SetScript("OnEnter", function(self) self:SetBackdropBorderColor(unpack(Theme.accent)) end)
     button:SetScript("OnLeave", function(self) self:SetBackdropBorderColor(unpack(Theme.border)) end)
     button:SetScript("OnClick", onClick)
     return button
+end
+
+-- Re-sets a button label and shrinks long translations to the label's inner width
+function SettingsDialog.setButtonText(button, text)
+    button.label:SetText(text or "")
+    if button.fitWidth then ns.UIKit:FitFontString(button.label, button.fitWidth, 1) end
 end
 
 -- Hover help: first line of the text is the title, the rest the details
@@ -290,9 +297,10 @@ function SettingsDialog.refreshFamilyWindow()
     if not (familyFrame and familyFrame:IsShown()) then return end
     familyFrame.title:SetText(ns:L("FAMILY_TITLE"))
     familyFrame.hint:SetText(ns:L("FAMILY_HINT"))
-    familyFrame.presetButton.label:SetText(ns:L("PRESET_BUTTON"))
+    SettingsDialog.setButtonText(familyFrame.presetButton, ns:L("PRESET_BUTTON"))
     for alphabet, row in pairs(familyFrame.rows) do
         row.label:SetText(ns:L("ALPHA_" .. alphabet))
+        ns.UIKit:FitFontString(row.label, 140, 1)
         local entry = ns:ResolveFont(ns.db.family[alphabet])
         row.button.label:SetText(entry and entry.name or ns:L("FONT_DEFAULT"))
         SettingsDialog.setFontSafely(row.button.label, entry and entry.path or ns:DefaultFontPath("chat"), 13)
@@ -356,6 +364,8 @@ function SettingsDialog.refreshTargetBlock(targetKey, block)
     local cfg = ns:TargetConfig(targetKey)
     local entry = ns:ResolveFont(cfg.font)
     block.title:SetText(ns:L("TARGET_" .. targetKey))
+    block.sizeLabel:SetText(ns:L("SIZE"))
+    ns.UIKit:FitFontString(block.sizeLabel, 46, 1)   -- room up to the - button
     block.fontButton.label:SetText(entry and entry.name or ns:L("FONT_DEFAULT"))
     SettingsDialog.renderFontSample(block.fontButton.label, entry, targetKey, 13)
 
@@ -471,7 +481,7 @@ end
 function SettingsDialog.refreshCustomSection()
     configFrame.customTitle:SetText(ns:L("CUSTOM_TITLE"))
     configFrame.customHint:SetText(ns:L("CUSTOM_HINT"))
-    configFrame.customAdd.label:SetText(ns:L("CUSTOM_ADD"))
+    SettingsDialog.setButtonText(configFrame.customAdd, ns:L("CUSTOM_ADD"))
     local customs = ns:CustomFontFiles()
     local overflow = #customs - CUSTOM_ROWS
     configFrame.customEmpty:SetText(#customs == 0 and ns:L("CUSTOM_EMPTY") or "")
@@ -483,7 +493,7 @@ function SettingsDialog.refreshCustomSection()
             row.text:SetText(custom.file .. (custom.auto and ("  |cffA7B9C5(" .. ns:L("SRC_auto") .. ")|r") or ""))
             SettingsDialog.setFontSafely(row.text, ns:CustomFontPath(custom.file), 13)
             row.text:SetTextColor(unpack(Theme.textBody))
-            row.remove.label:SetText(ns:L("CUSTOM_REMOVE"))
+            SettingsDialog.setButtonText(row.remove, ns:L("CUSTOM_REMOVE"))
         end
         row.text:SetShown(custom ~= nil)
         -- files found in the folder are removed by deleting the file, not here
@@ -566,11 +576,11 @@ function ns:RefreshOptions()
         SettingsDialog.refreshTargetBlock(targetKey, block)
     end
     SettingsDialog.refreshCustomSection()
-    configFrame.resetButton.label:SetText(self:L("RESET_ALL"))
-    configFrame.reloadButton.label:SetText(self:L("RELOAD"))
-    configFrame.testButton.label:SetText(self:L("TEST_BUTTON"))
+    SettingsDialog.setButtonText(configFrame.resetButton, self:L("RESET_ALL"))
+    SettingsDialog.setButtonText(configFrame.reloadButton, self:L("RELOAD"))
+    SettingsDialog.setButtonText(configFrame.testButton, self:L("TEST_BUTTON"))
     if SettingsDialog.refreshTestWindow then SettingsDialog.refreshTestWindow() end
-    if configFrame.familyButton then configFrame.familyButton.label:SetText(self:L("FAMILY_BUTTON")) end
+    if configFrame.familyButton then SettingsDialog.setButtonText(configFrame.familyButton, self:L("FAMILY_BUTTON")) end
     SettingsDialog.refreshFamilyWindow()
     if pickerFrame and pickerFrame:IsShown() then SettingsDialog.fillPicker() end
 end
