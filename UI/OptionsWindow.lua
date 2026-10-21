@@ -39,6 +39,48 @@ function SettingsDialog.createButton(parent, width, height, text, onClick)
     return button
 end
 
+-- Hover help: first line of the text is the title, the rest the details
+function SettingsDialog.showTip(owner, text)
+    if not text or text == "" then return end
+    GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+    GameTooltip:ClearLines()
+    local title, body = text:match("^([^\n]*)\n?(.*)$")
+    GameTooltip:AddLine(title, Theme.accent[1], Theme.accent[2], Theme.accent[3])
+    for line in (body or ""):gmatch("[^\n]+") do
+        GameTooltip:AddLine(line, 0.929, 0.957, 0.969, true)
+    end
+    GameTooltip:Show()
+end
+
+function SettingsDialog.attachTip(widget, tipKey)
+    if not (widget and widget.HookScript) then return end
+    if widget.EnableMouse then widget:EnableMouse(true) end
+    widget:HookScript("OnEnter", function(self)
+        SettingsDialog.showTip(self, type(tipKey) == "function" and tipKey(self) or ns:L(tipKey))
+    end)
+    widget:HookScript("OnLeave", function(self)
+        if GameTooltip:GetOwner() == self then GameTooltip:Hide() end
+    end)
+end
+
+-- Picker / list help for one font: style plus what it can show
+function SettingsDialog.fontTip(entry)
+    if not entry or entry.id == "default" then return ns:L("TIP_FONT_default") end
+    if entry.family then return ns:L("TIP_FAMILY") end
+    local lines = { entry.name }
+    if entry.source == "bundled" then
+        local key = "FONTDESC_" .. entry.id:gsub("^bundled:", "")
+        if ns:L(key) ~= key then lines[#lines + 1] = ns:L(key) end
+        local allHan = (ns:FontCoverage(entry, "chinese") or 0) >= 0.99 and entry.id == "bundled:worldsans"
+        lines[#lines + 1] = ns:L(allHan and "TIP_FONT_HAN_ALL" or "TIP_FONT_HAN_COMMON")
+    elseif entry.source == "custom" then
+        lines[#lines + 1] = ns:L("TIP_FONT_custom")
+    elseif entry.source == "shared" then
+        lines[#lines + 1] = ns:L("TIP_FONT_shared")
+    end
+    return table.concat(lines, "\n")
+end
+
 function SettingsDialog.setFontSafely(fontString, path, size)
     if not (path and pcall(fontString.SetFont, fontString, path, size, "") and fontString:GetFont()) then
         fontString:SetFontObject(GameFontHighlight)
@@ -85,8 +127,15 @@ function SettingsDialog.buildPicker()
         row.text:SetJustifyH("LEFT")
         row.text:SetWordWrap(false)
         row.tag = ns.UIKit:CreateLabel(row, "GameFontDisableSmall", "RIGHT", row, "RIGHT", -6, 0, Theme.textMuted)
-        row:SetScript("OnEnter", function(self) self.highlight:Show() end)
-        row:SetScript("OnLeave", function(self) self.highlight:Hide() end)
+        row:SetScript("OnEnter", function(self)
+            self.highlight:Show()
+            local entry = self.fontId == "default" and { id = "default" } or ns:ResolveFont(self.fontId)
+            SettingsDialog.showTip(self, SettingsDialog.fontTip(entry))
+        end)
+        row:SetScript("OnLeave", function(self)
+            self.highlight:Hide()
+            if GameTooltip:GetOwner() == self then GameTooltip:Hide() end
+        end)
         row:SetScript("OnClick", function(self)
             local onSelect = pickerFrame.onSelect
             pickerFrame:Hide()
@@ -216,11 +265,13 @@ function SettingsDialog.buildFamilyWindow()
             })
         end)
         row.button:SetPoint("TOPLEFT", 164, top)
+        SettingsDialog.attachTip(row.button, "TIP_FAMILY_ROW")
         familyFrame.rows[alphabet] = row
     end
     familyFrame.presetButton = SettingsDialog.createButton(familyFrame, 368, 28, "", function() ns:ApplyMultilingualPreset() end)
     familyFrame.presetButton:SetPoint("BOTTOMLEFT", 16, 44)
     familyFrame.presetButton.label:SetJustifyH("CENTER")
+    SettingsDialog.attachTip(familyFrame.presetButton, "TIP_PRESET")
     familyFrame.presetButton:SetBackdropBorderColor(unpack(Theme.accent))
     familyFrame.presetButton:SetScript("OnLeave", function(self) self:SetBackdropBorderColor(unpack(Theme.accent)) end)
 
@@ -271,6 +322,7 @@ function SettingsDialog.buildTargetBlock(targetKey, index)
         SettingsDialog.openTargetPicker(targetKey, self)
     end)
     block.fontButton:SetPoint("TOPLEFT", 20, top - 20)
+    SettingsDialog.attachTip(block.fontButton, "TIP_" .. targetKey)
 
     local function stepScale(delta)
         local cfg = ns:TargetConfig(targetKey)
@@ -286,6 +338,8 @@ function SettingsDialog.buildTargetBlock(targetKey, index)
     block.value:SetJustifyH("CENTER")
     block.plus = SettingsDialog.createButton(configFrame, 26, 26, "+", function() stepScale(ns.SCALE_STEP) end)
     block.plus:SetPoint("TOPLEFT", 422, top - 20)
+    SettingsDialog.attachTip(block.minus, "TIP_SIZE")
+    SettingsDialog.attachTip(block.plus, "TIP_SIZE")
     block.minus.label:SetJustifyH("CENTER")
     block.plus.label:SetJustifyH("CENTER")
 
@@ -385,11 +439,13 @@ function SettingsDialog.buildCustomSection(top)
     input:SetScript("OnEditFocusGained", function(self) self:SetBackdropBorderColor(unpack(Theme.accent)) end)
     input:SetScript("OnEditFocusLost", function(self) self:SetBackdropBorderColor(unpack(Theme.border)) end)
     configFrame.customInput = input
+    SettingsDialog.attachTip(input, "TIP_CUSTOM")
 
     configFrame.customAdd = SettingsDialog.createButton(configFrame, 100, 26, "", function()
         SettingsDialog.addCustomFont(input:GetText())
     end)
     configFrame.customAdd:SetPoint("LEFT", input, "RIGHT", 10, 0)
+    SettingsDialog.attachTip(configFrame.customAdd, "TIP_CUSTOM")
     configFrame.customAdd.label:SetJustifyH("CENTER")
 
     configFrame.customEmpty = ns.UIKit:CreateLabel(configFrame, "GameFontDisableSmall", "TOPLEFT", configFrame, "TOPLEFT", 22, top - 100, Theme.textMuted)
@@ -475,6 +531,7 @@ function SettingsDialog.build()
     if ns:FamilySupported() then
         configFrame.familyButton = SettingsDialog.createButton(configFrame, 150, 24, "", SettingsDialog.toggleFamilyWindow)
         configFrame.familyButton:SetPoint("RIGHT", close, "LEFT", -8, 0)
+        SettingsDialog.attachTip(configFrame.familyButton, "TIP_FAMILY")
         configFrame.familyButton.label:SetJustifyH("CENTER")
     end
 
@@ -493,6 +550,9 @@ function SettingsDialog.build()
     for _, button in ipairs({ configFrame.resetButton, configFrame.testButton, configFrame.reloadButton }) do
         button.label:SetJustifyH("CENTER")
     end
+    SettingsDialog.attachTip(configFrame.resetButton, "TIP_RESET")
+    SettingsDialog.attachTip(configFrame.testButton, "TIP_TEST")
+    SettingsDialog.attachTip(configFrame.reloadButton, "TIP_RELOAD")
 
     configFrame:Hide()
     return configFrame

@@ -75,6 +75,7 @@ function SettingsDialog.buildTestWindow()
         SettingsDialog.refreshTestWindow()
     end)
     testFrame.targetButton:SetPoint("TOPLEFT", 16, -66)
+    SettingsDialog.attachTip(testFrame.targetButton, "TIP_TEST_TARGET")
 
     testFrame.rows = {}
     for index, line in ipairs(TEST_LINES) do
@@ -108,6 +109,7 @@ function SettingsDialog.buildTestWindow()
     input:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
     input:SetScript("OnEnterPressed", function(self) self:ClearFocus() end)
     testFrame.input = input
+    SettingsDialog.attachTip(input, "TIP_TEST_INPUT")
     testFrame.preview = testFrame:CreateFontString(nil, "OVERLAY")
     testFrame.preview:SetPoint("TOPLEFT", 18, inputTop - 52)
     testFrame.preview:SetWidth(434)
