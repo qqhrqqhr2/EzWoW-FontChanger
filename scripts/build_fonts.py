@@ -2,9 +2,10 @@
 
 Each output keeps a pretty base font's own letters and fills everything it
 lacks from Noto fonts, so chat never shows boxes:
-  * "complete" fonts also get Han (Chinese / Japanese kanji) - large files.
-  * the others get accents, Greek, Cyrillic, kana, CJK punctuation and
-    symbols but no Han; the per-language mix uses a complete font for Chinese.
+  * "complete" fonts get every Han character (Chinese / Japanese kanji).
+  * the others get the 8,836 Han characters in everyday use (GB2312 +
+    Big5 level 1) to stay small, plus accents, Greek, Cyrillic, kana,
+    CJK punctuation and symbols.
 
 Usage: put the source files named in SOURCES / BUILDS in the current folder
 (google/fonts ofl/*, orioncactus/pretendard static/alternative), then run
@@ -30,6 +31,20 @@ LATIN_GAPS = rng((0x20, 0x7E), (0xA0, 0x24F), (0x250, 0x36F), (0x370, 0x3FF), (0
                  (0x1E00, 0x1FFF), (0x2000, 0x2BFF))
 CJK_MISC = rng((0x2E80, 0x2FDF), (0x3000, 0x33FF), (0xFE30, 0xFE4F), (0xFF00, 0xFFEF), (0x31F0, 0x31FF))
 HAN = rng((0x3400, 0x4DBF), (0x4E00, 0x9FFF), (0xF900, 0xFAFF))
+def common_han():
+    """Han in everyday use: GB2312 (Simplified) + Big5 level 1 (Traditional), 8,836 characters."""
+    chars = set()
+    for hi in range(0xB0, 0xF8):
+        for lo in range(0xA1, 0xFF):
+            try: chars.add(ord(bytes([hi, lo]).decode("gb2312")))
+            except UnicodeDecodeError: pass
+    for hi in range(0xA4, 0xC7):
+        for lo in list(range(0x40, 0x7F)) + list(range(0xA1, 0xFF)):
+            if (hi, lo) > (0xC6, 0x7E): continue
+            try: chars.add(ord(bytes([hi, lo]).decode("big5")))
+            except UnicodeDecodeError: pass
+    return {c for c in chars if 0x4E00 <= c <= 0x9FFF}
+HAN_COMMON = common_han()
 HANGUL = rng((0x1100, 0x11FF), (0x3130, 0x318F), (0xA960, 0xA97F), (0xAC00, 0xD7A3), (0xD7B0, 0xD7FF))
 SYMBOLS = rng((0x2000, 0x2BFF))
 
@@ -89,7 +104,7 @@ COVERAGE_TESTS = {
     "latin": rng((0x41, 0x5A), (0x61, 0x7A), (0xC0, 0x17F)) - {0xD7, 0xF7},
     "cyrillic": rng((0x410, 0x44F)) | {0x401, 0x451},
     "greek": rng((0x391, 0x3A1), (0x3A3, 0x3A9), (0x3B1, 0x3C9)),
-    "chinese": rng((0x4E00, 0x9FA5)),
+    "chinese": HAN_COMMON,
     "japanese": rng((0x3041, 0x3096), (0x30A1, 0x30FA)),
     "symbols": {ord(c) for c in "★☆♥♡♪♫→←↑↓✓✔✗※●○◆◇■□▲△▼▽…‘’“”«»€£¥©®™°±×÷"},
 }
@@ -104,9 +119,9 @@ for out_name, family, style, weight, base_path, complete in BUILDS:
     upem = base["head"].unitsPerEm
     taken = set(base.getBestCmap())
     if not complete:
-        taken -= HAN   # keep the file small; Han comes from a complete font
+        taken -= HAN - HAN_COMMON   # keep the base's own everyday Han, drop rare ones to stay small
     parts = [piece(base_path, None, taken, upem, "pc_base.ttf")]
-    plan = [("notosans", LATIN_GAPS), ("notokr", HANGUL), ("notosc", CJK_MISC | (HAN if complete else set())),
+    plan = [("notosans", LATIN_GAPS), ("notokr", HANGUL), ("notosc", CJK_MISC | (HAN if complete else HAN_COMMON)),
             ("symbols", SYMBOLS), ("symbols2", SYMBOLS), ("notosc", SYMBOLS)]
     for index, (key, wanted) in enumerate(plan):
         path, axes = SOURCES[key]

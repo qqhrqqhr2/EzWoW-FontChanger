@@ -19,11 +19,11 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 
 ### 포함된 글꼴
 
-모든 글꼴은 예쁜 기본 글꼴의 글자를 그대로 쓰고, 그 글꼴에 없는 글자(악센트 문자, 그리스·키릴 문자, 일본어 가나, 기호)를 Noto 글꼴로 채워 넣었습니다. 그래서 **한자를 뺀 모든 글자가 깨지지 않습니다.** 한자(중국어)는 용량이 커서 EzWoW World Sans에만 들어 있습니다.
+모든 글꼴은 예쁜 기본 글꼴의 글자를 그대로 쓰고, 그 글꼴에 없는 글자(악센트 문자, 그리스·키릴 문자, 일본어 가나, 기호)를 Noto 글꼴로 채워 넣었습니다. 한자는 중국·대만에서 일상적으로 쓰는 8,836자(GB2312 + Big5 1단계)를 모든 글꼴에 넣어서, **어느 글꼴을 골라도 플레이어 이름과 채팅이 깨지지 않습니다.** EzWoW World Sans에는 드물게 쓰는 한자까지 2만 9천여 자가 모두 들어 있습니다.
 
 | 글꼴 | 바탕 글꼴 | 느낌 |
 |---|---|---|
-| EzWoW World Sans | Pretendard | 깔끔한 기본 고딕, **한자 포함 (모든 언어 단독 사용)** |
+| EzWoW World Sans | Pretendard | 깔끔한 기본 고딕, **모든 한자 포함** |
 | EzWoW Sans Bold | Pretendard SemiBold | 굵은 고딕 |
 | EzWoW Neat Sans | SUIT | 단정한 고딕 |
 | EzWoW Tech Sans | IBM Plex Sans KR | 기계적인 고딕 |
@@ -38,8 +38,6 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 | EzWoW Pen Script | 나눔손글씨 펜 | 손글씨 |
 | EzWoW Gaegu | 개구 | 귀여운 손글씨 |
 | EzWoW Pixel | 갈무리11 | 픽셀 (레트로 게임) |
-
-World Sans를 뺀 글꼴은 한자가 없으므로, 채팅 등에 쓸 때는 **언어별 조합**으로 중국어 칸을 World Sans로 두세요 (깨짐 방지 버튼이 자동으로 맞춰 줍니다).
 
 모두 SIL Open Font License 1.1 글꼴을 고친 것이며, 출처와 라이선스는 `Fonts/LICENSE-EzWoWFonts.txt`, 만드는 방법은 `scripts/build_fonts.py`에 있습니다.
 
@@ -82,7 +80,7 @@ World Sans를 뺀 글꼴은 한자가 없으므로, 채팅 등에 쓸 때는 **�
 
 Changes the font and size of four parts of the game separately: the game UI, chat, combat numbers, and nameplates / names above heads. Combat numbers and names above heads need a relog to change.
 
-Bundled fonts (modified SIL OFL 1.1 fonts, built by `scripts/build_fonts.py`): each keeps a pretty base font (Pretendard, Gothic A1, Gowun Dodum, NanumGothic, NanumMyeongjo) and fills every missing non-Han letter (accents, Greek, Cyrillic, kana, symbols) from Noto, so nothing but Chinese characters can show as boxes. **EzWoW World Sans** also contains Han and works alone for every language. The **Font test** window draws each language with your current settings and reports whether all letters exist.
+Bundled fonts (modified SIL OFL 1.1 fonts, built by `scripts/build_fonts.py`): each keeps a pretty base font (Pretendard, Gothic A1, Gowun Dodum, NanumGothic, NanumMyeongjo) and fills every missing non-Han letter (accents, Greek, Cyrillic, kana, symbols) from Noto, plus the 8,836 everyday Han characters, so any of them works alone for every language; **EzWoW World Sans** has every Han character. The **Font test** window draws each language with your current settings and reports whether all letters exist.
 
 **Per-language mix**: under *Per-language mix* (top right of the settings), pick a font for each alphabet (Latin, Korean, Simplified / Traditional Chinese, Russian), then choose *Per-language mix* as a target's font. The game draws each character with the font for its language (`CreateFontFamily`).
 

@@ -6,8 +6,9 @@ local _, ns = ...
 local type, pairs, ipairs, tonumber, tostring, select, pcall = type, pairs, ipairs, tonumber, tostring, select, pcall
 
 -- Every bundled font contains all of Latin (with accents), Greek, Cyrillic,
--- Hangul, kana and common symbols; only World Sans also contains Han
--- (Chinese characters). Exact coverage lives in Data/FontCoverage.lua.
+-- Hangul, kana, common symbols and the 8,836 Han characters in everyday use
+-- (GB2312 + Big5 level 1); World Sans has every Han character.
+-- Exact coverage lives in Data/FontCoverage.lua.
 ns.BUNDLED_FONTS = {
     { id = "worldsans",   file = "EzWoW-WorldSans-Medium.ttf", name = "EzWoW World Sans" },
     { id = "sansbold",    file = "EzWoW-SansBold.ttf",         name = "EzWoW Sans Bold" },
@@ -67,7 +68,7 @@ function ns:FontCatalog()
     local list = {}
     for _, font in ipairs(self.BUNDLED_FONTS) do
         local hasHan = (self:FontCoverage(font, "chinese") or 0) > 0.99
-        -- fonts without Han get World Sans for Chinese automatically (see ns:UsesFamily)
+        -- a font without everyday Han would get World Sans for Chinese automatically (ns:UsesFamily)
         list[#list + 1] = { id = "bundled:" .. font.id, name = font.name, file = font.file, path = self.FONT_PATH .. font.file,
             source = "bundled", multilingual = hasHan, autoMix = not hasHan }
     end
