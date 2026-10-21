@@ -1,0 +1,39 @@
+## Interface: 16001
+## X-Curse-Project-ID: 0
+## Title: EzWoW - Font Changer
+## Title-enUS: EzWoW - Font Changer
+## Title-koKR: EzWoW - Font Changer
+## Title-deDE: EzWoW - Font Changer
+## Title-frFR: EzWoW - Font Changer
+## Title-esES: EzWoW - Font Changer
+## Title-esMX: EzWoW - Font Changer
+## Title-ruRU: EzWoW - Font Changer
+## Title-zhCN: EzWoW - Font Changer
+## Title-zhTW: EzWoW - Font Changer
+## Notes: Change fonts and sizes for the game UI, chat, combat numbers and nameplates (/ezfont)
+## Notes-enUS: Change fonts and sizes for the game UI, chat, combat numbers and nameplates (/ezfont)
+## Notes-koKR: 게임 UI, 채팅창, 전투 숫자, 이름표의 글꼴과 크기를 바꿉니다 (/ezfont)
+## Notes-deDE: Schriftarten und -größen für Oberfläche, Chat, Kampfzahlen und Namensplaketten ändern (/ezfont)
+## Notes-frFR: Change les polices et tailles de l'interface, du chat, des chiffres de combat et des barres d'info (/ezfont)
+## Notes-esES: Cambia fuentes y tamaños de la interfaz, el chat, los números de combate y las placas de nombre (/ezfont)
+## Notes-esMX: Cambia fuentes y tamaños de la interfaz, el chat, los números de combate y las placas de nombre (/ezfont)
+## Notes-ruRU: Шрифты и размеры для интерфейса, чата, цифр боя и индикаторов (/ezfont)
+## Notes-zhCN: 更改游戏界面、聊天、战斗数字与姓名板的字体和大小 (/ezfont)
+## Notes-zhTW: 更改遊戲介面、聊天、戰鬥數字與名條的字型和大小 (/ezfont)
+## Author: qqhrqqhr2
+## Version: 1.0.0
+## Category: EzWoW
+## IconTexture: Interface\AddOns\EzWoW-FontChanger\Media\Icon
+## SavedVariables: EzWoW_FontChangerDB
+## AddonCompartmentFunc: EzWoW_FontChanger_OnAddonCompartmentClick
+## OptionalDeps: EzWoW-MyFonts, LibSharedMedia-3.0, SharedMedia
+
+Core\Init.lua
+Core\UIKit.lua
+Core\Locales.lua
+Data\FontCoverage.lua
+Data\FontList.lua
+Modules\FontFamily.lua
+Modules\FontApplier.lua
+UI\OptionsWindow.lua
+UI\FontTestWindow.lua

@@ -1,0 +1,91 @@
+# EzWoW - Font Changer (`EzWoW-FontChanger`)
+
+**[한국어](#한국어) · [English](#english)**
+
+WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
+
+---
+
+## 한국어
+
+게임 화면을 네 영역으로 나눠 각각 글꼴과 크기를 바꾸는 애드온입니다.
+
+| 영역 | 바뀌는 곳 | 적용 시점 |
+|---|---|---|
+| 게임 전체 UI 글꼴 | 창·버튼·툴팁·퀘스트 글 등 | 바로 |
+| 채팅창 | 채팅 글자, 입력창, 말풍선 | 바로 (크기는 채팅 탭 우클릭 → 글꼴 크기) |
+| 전투 숫자 | 머리 위로 뜨는 데미지·치유 숫자 | 재접속 후 |
+| 이름표·머리 위 이름 | 이름표, 캐릭터·몬스터 머리 위 이름 | 이름표는 바로, 머리 위 이름은 재접속 후 |
+
+### 포함된 글꼴
+
+모든 글꼴은 예쁜 기본 글꼴의 글자를 그대로 쓰고, 그 글꼴에 없는 글자(악센트 문자, 그리스·키릴 문자, 일본어 가나, 기호)를 Noto 글꼴로 채워 넣었습니다. 그래서 **한자를 뺀 모든 글자가 깨지지 않습니다.** 한자(중국어)는 용량이 커서 EzWoW World Sans에만 들어 있습니다.
+
+| 글꼴 | 바탕 글꼴 | 느낌 |
+|---|---|---|
+| EzWoW World Sans | Pretendard | 깔끔한 기본 고딕, **한자 포함 (모든 언어 단독 사용)** |
+| EzWoW Sans Bold | Pretendard SemiBold | 굵은 고딕 |
+| EzWoW Neat Sans | SUIT | 단정한 고딕 |
+| EzWoW Tech Sans | IBM Plex Sans KR | 기계적인 고딕 |
+| EzWoW Round Gothic | Gothic A1 | 둥글고 넓은 고딕 |
+| EzWoW Gothic | 나눔고딕 | 익숙한 고딕 |
+| EzWoW Soft Dodum | 고운돋움 | 부드러운 돋움 |
+| EzWoW Myeongjo | 나눔명조 | 명조 |
+| EzWoW Song Myung | 송명 | 붓 느낌 명조 |
+| EzWoW Jua | 주아 | 동글동글 굵은 |
+| EzWoW Do Hyeon | 도현 | 각진 제목용 |
+| EzWoW Black Han Sans | 검은고딕 | 아주 굵은 제목용 |
+| EzWoW Pen Script | 나눔손글씨 펜 | 손글씨 |
+| EzWoW Gaegu | 개구 | 귀여운 손글씨 |
+| EzWoW Pixel | 갈무리11 | 픽셀 (레트로 게임) |
+
+World Sans를 뺀 글꼴은 한자가 없으므로, 채팅 등에 쓸 때는 **언어별 조합**으로 중국어 칸을 World Sans로 두세요 (깨짐 방지 버튼이 자동으로 맞춰 줍니다).
+
+모두 SIL Open Font License 1.1 글꼴을 고친 것이며, 출처와 라이선스는 `Fonts/LICENSE-EzWoWFonts.txt`, 만드는 방법은 `scripts/build_fonts.py`에 있습니다.
+
+### 언어별 글꼴 조합
+
+설정창 오른쪽 위 **언어별 조합 설정**에서 문자 종류(영어·유럽 문자, 한글, 중국어 간체, 중국어 번체, 러시아어)마다 글꼴을 고릅니다. 그다음 영역 글꼴에서 **언어별 조합**을 고르면, 게임이 글자마다 그 언어의 글꼴로 그립니다 (`CreateFontFamily`). 언어별 조합 창의 **모든 영역 글자 깨짐 방지 적용**을 누르면, 고른 예쁜 글꼴은 그대로 두고 중국어 칸만 World Sans로 맞춰 어느 언어도 깨지지 않게 해 줍니다.
+
+### 글꼴 테스트
+
+설정창 아래 **글꼴 테스트**에서 한국어·영어(유럽)·러시아어·그리스어·중국어·일본어·기호를 지금 설정한 글꼴로 그려 보고, 언어마다 "모두 표시 / 일부만 / 글자 없음"을 보여 줍니다. 입력칸에 플레이어 이름 등을 직접 넣어 확인할 수도 있습니다.
+
+### 내 글꼴 쓰기
+
+내 글꼴은 `Interface/AddOns/EzWoW-MyFonts/` 폴더에 넣습니다. 이 애드온 폴더 밖이라 업데이트해도 지워지지 않습니다. 와우 애드온은 폴더 안 파일 목록을 읽을 수 없어서, 아래 세 방법 중 하나로 인식시킵니다. 어느 방법이든 파일을 넣은 뒤 **게임을 다시 켜야** 합니다.
+
+1. **이름 바꾸기 (가장 쉬움)**: 파일 이름을 `font1.ttf` ~ `font30.ttf`로 바꾸면 자동으로 인식됩니다.
+2. **목록 만들기 (원래 이름 그대로)**: 저장소의 `tools/make_myfonts.ps1`을 그 폴더에 넣고 *PowerShell로 실행* 합니다. 파이썬이 있다면 `tools/make_myfonts.py <폴더>`도 됩니다. 폴더 안 모든 `.ttf`/`.otf`가 목록에 들어가고, 글꼴을 바꿀 때마다 다시 실행하면 됩니다.
+3. **직접 입력**: 설정창 **내 글꼴 추가**에 파일 이름을 입력합니다.
+
+다른 애드온이 SharedMedia에 등록한 글꼴도 목록에 함께 나옵니다.
+
+### 나만의 글꼴 만들기 (PC 프로그램)
+
+`tools/EzWoW-FontMaker.pyw`는 언어별로 고른 무료 글꼴을 하나의 `.ttf`로 합쳐 주는 PC 프로그램입니다 (Python 3 필요, 첫 실행 때 fonttools·pillow 설치를 안내합니다).
+
+- 영어·유럽 문자 / 한글 / 러시아·그리스 문자 / 일본어 가나 / 한자 / 기호마다 글꼴·굵기·크기를 고릅니다. 한글 글꼴 16종, 영문 글꼴 5종, Noto 글꼴이 목록에 있고, 내 `.ttf` 파일도 쓸 수 있습니다.
+- **저작권 안전장치**: OFL 라이선스가 확인된 글꼴만 받아들이고, 재료 글꼴의 예약 이름(Reserved Font Name)이 들어간 이름으로는 저장하지 않으며, 원본 저작권 표기를 글꼴 안과 `-LICENSE.txt` 파일에 자동으로 넣습니다.
+- 고른 글꼴에 없는 글자는 같은 굵기의 Noto로 채워 네모(□)가 생기지 않습니다.
+- **언어별 테스트**: 만들기 전에는 고른 글꼴로, 만든 뒤에는 결과 글꼴로 언어마다 그려 보고 "모두 표시 / 없음 N자"를 보여 줍니다. 직접 입력한 글자도 확인할 수 있습니다.
+- 저장 폴더를 `Interface/AddOns/EzWoW-MyFonts`로 고르면 목록 파일까지 만들어 Font Changer가 게임 재시작 후 바로 인식합니다.
+
+### 명령어
+
+- `/ezfont` : 설정창 열기
+- `/ezfont reset` : 모든 영역을 게임 기본 글꼴로 되돌리기
+
+---
+
+## English
+
+Changes the font and size of four parts of the game separately: the game UI, chat, combat numbers, and nameplates / names above heads. Combat numbers and names above heads need a relog to change.
+
+Bundled fonts (modified SIL OFL 1.1 fonts, built by `scripts/build_fonts.py`): each keeps a pretty base font (Pretendard, Gothic A1, Gowun Dodum, NanumGothic, NanumMyeongjo) and fills every missing non-Han letter (accents, Greek, Cyrillic, kana, symbols) from Noto, so nothing but Chinese characters can show as boxes. **EzWoW World Sans** also contains Han and works alone for every language. The **Font test** window draws each language with your current settings and reports whether all letters exist.
+
+**Per-language mix**: under *Per-language mix* (top right of the settings), pick a font for each alphabet (Latin, Korean, Simplified / Traditional Chinese, Russian), then choose *Per-language mix* as a target's font. The game draws each character with the font for its language (`CreateFontFamily`).
+
+To use your own font, put `.ttf` files in `Interface/AddOns/EzWoW-MyFonts/`, restart the game, and add the file name under **Add my font**. Fonts registered with SharedMedia by other addons are listed too.
+
+Commands: `/ezfont` (settings), `/ezfont reset` (back to game fonts).
