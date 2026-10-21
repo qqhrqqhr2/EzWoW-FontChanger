@@ -65,6 +65,10 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 
 설정창 아래 **글꼴 테스트**에서 한국어·영어(유럽)·러시아어·그리스어·중국어·일본어·기호를 지금 설정한 글꼴로 그려 보고, 언어마다 "모두 표시 / 일부만 / 글자 없음"을 보여 줍니다. 입력칸에 플레이어 이름 등을 직접 넣어 확인할 수도 있습니다.
 
+### 애드온 언어
+
+설정창 오른쪽 위 **언어** 상자를 누르고 목록에서 언어를 고르면 이 애드온 창의 글자가 바로 그 언어로 바뀝니다. 자동, 한국어, English, Deutsch, Français, Español, Русский, 简体中文, 繁體中文 중에서 고를 수 있고, 자동은 게임 언어를 따릅니다.
+
 ### 내 글꼴 쓰기
 
 내 글꼴은 `Interface/AddOns/EzWoW-MyFonts/` 폴더에 넣습니다. 이 애드온 폴더 밖이라 업데이트해도 지워지지 않습니다. 와우 애드온은 폴더 안 파일 목록을 읽을 수 없어서, 아래 세 방법 중 하나로 인식시킵니다. 어느 방법이든 파일을 넣은 뒤 **게임을 다시 켜야** 합니다.
@@ -110,6 +114,8 @@ Changes the font and size of five parts of the game separately: the game UI, cha
 Bundled fonts (modified SIL OFL 1.1 fonts, built by `scripts/build_fonts.py`): each keeps a pretty base font (Pretendard, Gothic A1, Gowun Dodum, NanumGothic, NanumMyeongjo) and fills every missing non-Han letter (accents, Greek, Cyrillic, kana, symbols) from Noto, plus the 8,836 everyday Han characters, so any of them works alone for every language; **EzWoW World Sans** has every Han character. The **Font test** window draws each language with your current settings and reports whether all letters exist.
 
 **Per-language mix**: under *Per-language mix* (top right of the settings), pick a font for each alphabet (Latin, Korean, Simplified / Traditional Chinese, Russian), then choose *Per-language mix* as a target's font. The game draws each character with the font for its language (`CreateFontFamily`).
+
+**Language**: click the *Language* box at the top right of the settings and pick a language from the list; the addon's windows switch right away. *Automatic* follows the game language.
 
 To use your own font, put `.ttf` files in `Interface/AddOns/EzWoW-MyFonts/`, restart the game, and add the file name under **Add my font**. Fonts registered with SharedMedia by other addons are listed too.
 

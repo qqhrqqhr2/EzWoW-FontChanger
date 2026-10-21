@@ -14,8 +14,9 @@ local BLOCK_TOP, BLOCK_HEIGHT = -112, 84
 local PREVIEW_SIZE = 15
 local CUSTOM_ROWS = 5
 local PICKER_ROWS = 8
+local LANGUAGE_BUTTON_WIDTH, LANGUAGE_LIST_WIDTH, LANGUAGE_ROW_HEIGHT = 160, 200, 22
 
-local configFrame, pickerFrame, advancedFrame
+local configFrame, pickerFrame, advancedFrame, languageList
 
 -----------------------------------------------------------------------------
 -- Widgets
@@ -171,6 +172,7 @@ function SettingsDialog.entryTag(entry)
 end
 
 function SettingsDialog.fillPicker()
+    pickerFrame.title:SetText(ns:L("PICK_TITLE"))
     local total = #pickerFrame.entries
     pickerFrame.scrollHint:SetText(total > PICKER_ROWS and string.format(ns:L("PICK_SCROLL"),
         pickerFrame.offset + 1, math.min(total, pickerFrame.offset + PICKER_ROWS), total) or "")
@@ -202,6 +204,7 @@ end
 -- opts: { key, anchor, selectedId, previewTarget, includeFamily, isMember, onSelect }
 function SettingsDialog.openPicker(opts)
     SettingsDialog.buildPicker()
+    if languageList then languageList:Hide() end
     if pickerFrame:IsShown() and pickerFrame.key == opts.key then
         pickerFrame:Hide()
         return
@@ -545,6 +548,117 @@ function SettingsDialog.refreshCustomSection()
 end
 
 -----------------------------------------------------------------------------
+-- Addon Language (combo box: click it, then click a language in the list)
+-----------------------------------------------------------------------------
+-- Drawn in World Sans so every language name shows on any client, even when
+-- the chosen language's letters are missing from the game font.
+function SettingsDialog.languageFont(fontString, size)
+    local entry = ns:ResolveFont("bundled:worldsans")
+    SettingsDialog.setFontSafely(fontString, entry and entry.path, size)
+end
+
+function SettingsDialog.buildLanguageList()
+    if languageList then return languageList end
+    languageList = CreateFrame("Frame", nil, configFrame, "BackdropTemplate")
+    languageList:SetSize(LANGUAGE_LIST_WIDTH, 12 + #ns.LANGUAGE_ORDER * LANGUAGE_ROW_HEIGHT)
+    languageList:SetFrameStrata("FULLSCREEN_DIALOG")
+    languageList:SetFrameLevel(configFrame:GetFrameLevel() + 50)
+    languageList:EnableMouse(true)
+    languageList:SetClampedToScreen(true)
+    ns.UIKit:ApplySurface(languageList, Theme.bgPrimary, Theme.accent)
+    languageList.rows = {}
+    for index, code in ipairs(ns.LANGUAGE_ORDER) do
+        local row = CreateFrame("Button", nil, languageList)
+        row:SetSize(LANGUAGE_LIST_WIDTH - 12, LANGUAGE_ROW_HEIGHT)
+        row:SetPoint("TOPLEFT", 6, -6 - (index - 1) * LANGUAGE_ROW_HEIGHT)
+        row.code = code
+        row.highlight = row:CreateTexture(nil, "BACKGROUND")
+        row.highlight:SetAllPoints()
+        row.highlight:SetColorTexture(Theme.accent[1], Theme.accent[2], Theme.accent[3], 0.18)
+        row.highlight:Hide()
+        row.text = row:CreateFontString(nil, "OVERLAY")
+        SettingsDialog.languageFont(row.text, 13)
+        row.text:SetPoint("LEFT", 8, 0)
+        row.text:SetPoint("RIGHT", -8, 0)
+        row.text:SetJustifyH("LEFT")
+        row.text:SetWordWrap(false)
+        row:SetScript("OnEnter", function(self) self.highlight:Show() end)
+        row:SetScript("OnLeave", function(self) self.highlight:Hide() end)
+        row:SetScript("OnClick", function(self)
+            languageList:Hide()
+            ns:SetLanguage(self.code)
+        end)
+        languageList.rows[index] = row
+    end
+    languageList:Hide()
+    return languageList
+end
+
+function SettingsDialog.fillLanguageList()
+    local current = ns.db.language or "auto"
+    for _, row in ipairs(languageList.rows) do
+        local selected = row.code == current
+        row.text:SetText((selected and "> " or "") .. ns:LanguageName(row.code))
+        local color = selected and Theme.accent or Theme.textBody
+        row.text:SetTextColor(color[1], color[2], color[3])
+        ns.UIKit:FitFontString(row.text, LANGUAGE_LIST_WIDTH - 28, 1)
+    end
+end
+
+function SettingsDialog.toggleLanguageList()
+    SettingsDialog.buildLanguageList()
+    if languageList:IsShown() then
+        languageList:Hide()
+        return
+    end
+    if pickerFrame then pickerFrame:Hide() end
+    languageList:ClearAllPoints()
+    languageList:SetPoint("TOPRIGHT", configFrame.languageButton, "BOTTOMRIGHT", 0, -2)
+    SettingsDialog.fillLanguageList()
+    languageList:Show()
+end
+
+function SettingsDialog.buildLanguageButton()
+    local button = SettingsDialog.createButton(configFrame, LANGUAGE_BUTTON_WIDTH, 22, "", SettingsDialog.toggleLanguageList)
+    button:SetPoint("TOPRIGHT", -42, -11)
+    button.label:ClearAllPoints()
+    button.label:SetPoint("LEFT", 8, 0)
+    button.label:SetPoint("RIGHT", -22, 0)
+    button.label:SetJustifyH("LEFT")
+    button.fitWidth = LANGUAGE_BUTTON_WIDTH - 30
+    SettingsDialog.languageFont(button.label, 12)
+    -- the dropdown arrow: the game's right arrow turned to point down
+    button.arrow = button:CreateTexture(nil, "OVERLAY")
+    button.arrow:SetSize(12, 12)
+    button.arrow:SetPoint("RIGHT", -7, 0)
+    button.arrow:SetTexture("Interface\\ChatFrame\\ChatFrameExpandArrow")
+    button.arrow:SetTexCoord(0, 1, 1, 1, 0, 0, 1, 0)
+    button.arrow:SetVertexColor(Theme.accent[1], Theme.accent[2], Theme.accent[3])
+    SettingsDialog.attachTip(button, "TIP_LANGUAGE")
+    configFrame.languageButton = button
+
+    configFrame.languageLabel = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "RIGHT", button, "LEFT", -6, 0, Theme.textMuted)
+    configFrame.languageLabel:SetJustifyH("RIGHT")
+    SettingsDialog.languageFont(configFrame.languageLabel, 12)
+end
+
+function SettingsDialog.refreshLanguageButton()
+    configFrame.languageLabel:SetText(ns:L("LANGUAGE"))
+    ns.UIKit:FitFontString(configFrame.languageLabel, 80, 1)
+    SettingsDialog.setButtonText(configFrame.languageButton, ns:LanguageName(ns.db.language))
+    if languageList and languageList:IsShown() then SettingsDialog.fillLanguageList() end
+end
+
+function ns:SetLanguage(code)
+    if code ~= "auto" and not self.LANGUAGE_NAMES[code] then return end
+    local db = self.db or self:InitializeDatabase()
+    db.language = code
+    self:RefreshOptions()
+    if self.RefreshBlizzardPanel then self:RefreshBlizzardPanel() end
+    self:Print(string.format(self:L("MSG_LANGUAGE"), self:LanguageName(code)))
+end
+
+-----------------------------------------------------------------------------
 -- Window
 -----------------------------------------------------------------------------
 function SettingsDialog.toggleAdvanced()
@@ -600,6 +714,7 @@ function SettingsDialog.build()
     configFrame:SetScript("OnDragStop", configFrame.StopMovingOrSizing)
     configFrame:SetScript("OnHide", function()
         if pickerFrame then pickerFrame:Hide() end
+        if languageList then languageList:Hide() end
         if familyFrame then familyFrame:Hide() end
         if advancedFrame then advancedFrame:Hide() end
     end)
@@ -617,6 +732,7 @@ function SettingsDialog.build()
     local close = SettingsDialog.createButton(configFrame, 24, 24, "x", function() configFrame:Hide() end)
     close:SetPoint("TOPRIGHT", -10, -10)
     close.label:SetJustifyH("CENTER")
+    SettingsDialog.buildLanguageButton()
     configFrame.allFontButton = SettingsDialog.createButton(configFrame, WINDOW_WIDTH - 40, 28, "", SettingsDialog.openAllFontPicker)
     configFrame.allFontButton:SetPoint("TOPLEFT", 20, -66)
     configFrame.allFontButton.label:SetJustifyH("CENTER")
@@ -650,6 +766,7 @@ end
 function ns:RefreshOptions()
     if not configFrame or not configFrame:IsShown() then return end
     configFrame.titleText:SetText(self:L("TITLE"))
+    SettingsDialog.refreshLanguageButton()
     configFrame.subtitle:SetText(self:L("SIMPLE_SUBTITLE"))
     configFrame.subtitle:SetWidth(WINDOW_WIDTH - 40)
     configFrame.subtitle:SetWordWrap(false)

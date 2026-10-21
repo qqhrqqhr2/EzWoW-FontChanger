@@ -9,6 +9,11 @@ local Theme = ns.UIKit.Theme
 local PANEL_TITLE = "EzWoW - Font Changer"
 local optionsPanel
 
+-- Redraws the page after the addon language changes
+function ns:RefreshBlizzardPanel()
+    if optionsPanel and optionsPanel:IsShown() then optionsPanel.refreshText() end
+end
+
 function ns:RegisterBlizzardOptions()
     if optionsPanel then return end
     optionsPanel = CreateFrame("Frame", "EzWoWFontChangerOptionsPanel", UIParent)

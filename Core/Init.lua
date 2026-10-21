@@ -19,6 +19,7 @@ ns.DONATE_URL = "https://buymeacoffee.com/qqhrqqhr2"
 ns.TARGET_ORDER = { "ui", "chat", "tooltip", "combat", "nameplate" }
 
 ns.DEFAULTS = {
+    language = "auto",  -- addon window language; "auto" follows the game client
     targets = {
         ui        = { font = "default", scale = 100 },
         chat      = { font = "default", scale = 100 },

@@ -947,11 +947,61 @@ for locale, labels in pairs(helpText) do
     for index, key in ipairs(helpKeys) do ns.Locales[locale][key] = labels[index] end
 end
 
-function ns:L(key)
-    local locale = GetLocale and GetLocale() or "enUS"
+-- Addon language: "auto" follows the game; any other code is the player's pick
+ns.LANGUAGE_ORDER = { "auto", "koKR", "enUS", "deDE", "frFR", "esES", "ruRU", "zhCN", "zhTW" }
+ns.LANGUAGE_NAMES = {
+    koKR = "한국어", enUS = "English", deDE = "Deutsch", frFR = "Français",
+    esES = "Español", ruRU = "Русский", zhCN = "简体中文", zhTW = "繁體中文",
+}
+
+function ns:ActiveLocale()
+    local db = self.db or (type(EzWoW_FontChangerDB) == "table" and EzWoW_FontChangerDB)
+    local locale = db and db.language
+    if not (locale and self.Locales[locale]) then locale = GetLocale and GetLocale() or "enUS" end
     if locale == "esMX" then locale = "esES" end
-    local active = self.Locales[locale] or self.Locales.enUS
+    return self.Locales[locale] and locale or "enUS"
+end
+
+function ns:LanguageName(code)
+    if not code or code == "auto" then return self:L("LANGUAGE_AUTO") end
+    return self.LANGUAGE_NAMES[code] or code
+end
+
+function ns:L(key)
+    local active = self.Locales[self:ActiveLocale()]
     return active[key] or self.Locales.enUS[key] or key
+end
+
+-- Language picker in the settings window: label, automatic entry, help, chat message
+local languageLabels = {
+    enUS = { "Language", "Automatic (game language)",
+        "Addon language\nChoose the language of this addon's windows. It changes right away.\nAutomatic follows the game language.\nIf letters show as boxes (□), set \"Game UI text\" to a multilingual font such as EzWoW World Sans.",
+        "Addon language: %s" },
+    koKR = { "언어", "자동 (게임 언어)",
+        "애드온 언어\n이 애드온 창에 나오는 언어를 고릅니다. 고르면 바로 바뀝니다.\n자동은 게임 언어를 따릅니다.\n글자가 상자(□)로 보이면 '게임 전체 UI 글꼴'을 EzWoW World Sans 같은 다국어 글꼴로 바꾸세요.",
+        "애드온 언어: %s" },
+    deDE = { "Sprache", "Automatisch (Spielsprache)",
+        "Addon-Sprache\nWählt die Sprache der Fenster dieses Addons. Gilt sofort.\nAutomatisch folgt der Spielsprache.\nErscheinen Zeichen als Kästchen (□), stelle „Spieloberfläche“ auf eine mehrsprachige Schrift wie EzWoW World Sans.",
+        "Addon-Sprache: %s" },
+    frFR = { "Langue", "Automatique (langue du jeu)",
+        "Langue de l'addon\nChoisit la langue des fenêtres de cet addon. Le changement est immédiat.\nAutomatique suit la langue du jeu.\nSi des lettres s'affichent en carrés (□), choisissez une police multilingue comme EzWoW World Sans pour « Interface du jeu ».",
+        "Langue de l'addon : %s" },
+    esES = { "Idioma", "Automático (idioma del juego)",
+        "Idioma del accesorio\nElige el idioma de las ventanas de este accesorio. Se aplica al instante.\nAutomático sigue el idioma del juego.\nSi ves cuadros (□) en vez de letras, usa una fuente multilingüe como EzWoW World Sans en «Interfaz del juego».",
+        "Idioma del accesorio: %s" },
+    ruRU = { "Язык", "Автоматически (язык игры)",
+        "Язык аддона\nВыбирает язык окон этого аддона. Меняется сразу.\nАвтоматически — как язык игры.\nЕсли вместо букв квадраты (□), выберите для «Интерфейс игры» многоязычный шрифт, например EzWoW World Sans.",
+        "Язык аддона: %s" },
+    zhCN = { "语言", "自动（游戏语言）",
+        "插件语言\n选择本插件窗口使用的语言，选择后立即生效。\n自动：跟随游戏语言。\n如果文字显示为方框（□），请将“游戏界面文字”改为 EzWoW World Sans 等多语言字体。",
+        "插件语言：%s" },
+    zhTW = { "語言", "自動（遊戲語言）",
+        "插件語言\n選擇本插件視窗使用的語言，選擇後立即生效。\n自動：跟隨遊戲語言。\n如果文字顯示為方框（□），請將「遊戲介面文字」改為 EzWoW World Sans 等多語言字型。",
+        "插件語言：%s" },
+}
+for locale, labels in pairs(languageLabels) do
+    local target = ns.Locales[locale]
+    target.LANGUAGE, target.LANGUAGE_AUTO, target.TIP_LANGUAGE, target.MSG_LANGUAGE = labels[1], labels[2], labels[3], labels[4]
 end
 
 -- Font descriptions for the remaining client languages.
