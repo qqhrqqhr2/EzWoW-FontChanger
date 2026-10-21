@@ -64,15 +64,31 @@ function ns:ApplyMultilingualPreset()
     self:Print(self:L("MSG_PRESET"))
 end
 
-function ns:GetFamilyFont(targetKey, size, flags)
+-- true when this font is drawn through a family: the per-language mix, or a
+-- bundled font without Han that gets World Sans for Chinese automatically
+function ns:UsesFamily(entry)
+    return entry ~= nil and (entry.family or entry.autoMix) and self:FamilySupported() or false
+end
+
+local CHINESE_ALPHABETS = { simplifiedchinese = true, traditionalchinese = true }
+
+function ns:GetFamilyFont(targetKey, size, flags, entry)
     if not self:FamilySupported() then return nil end
     size = math.floor((tonumber(size) or 12) + 0.5)
     flags = flags or ""
-    local cacheKey = targetKey .. "|" .. size .. "|" .. flags
+    local autoMix = entry and entry.autoMix
+    local cacheKey = (autoMix and entry.id or "mix") .. "|" .. targetKey .. "|" .. size .. "|" .. flags
     if familyCache[cacheKey] then return familyCache[cacheKey] end
+    local hanEntry = autoMix and self:ResolveFont("bundled:worldsans")
     local members = {}
     for _, alphabet in ipairs(self.FAMILY_ALPHABETS) do
-        members[#members + 1] = { alphabet = alphabet, file = self:FamilyMemberPath(alphabet, targetKey), height = size, flags = flags }
+        local file
+        if autoMix then
+            file = (CHINESE_ALPHABETS[alphabet] and hanEntry and hanEntry.path) or entry.path
+        else
+            file = self:FamilyMemberPath(alphabet, targetKey)
+        end
+        members[#members + 1] = { alphabet = alphabet, file = file, height = size, flags = flags }
     end
     familySerial = familySerial + 1
     local ok, family = pcall(CreateFontFamily, "EzWoWFontChangerFamily" .. familySerial, members)
@@ -84,7 +100,9 @@ end
 
 -- After a member font changes: rebuild families and re-apply targets using them
 function ns:RefreshFamilies()
-    familyCache = {}
+    for cacheKey in pairs(familyCache) do
+        if cacheKey:find("^mix|") then familyCache[cacheKey] = nil end   -- auto mixes don't depend on members
+    end
     for _, targetKey in ipairs(self.TARGET_ORDER) do
         if self:TargetConfig(targetKey).font == "family" then self:ApplyTarget(targetKey) end
     end

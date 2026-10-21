@@ -32,6 +32,9 @@ function SettingsDialog.testEntryFor(targetKey, line)
         local memberId = ns.db.family[line.alphabet]
         return memberId and memberId ~= "default" and ns:ResolveFont(memberId) or nil
     end
+    if ns:UsesFamily(entry) and line.key == "chinese" then
+        return ns:ResolveFont("bundled:worldsans")   -- automatic Han from World Sans
+    end
     return entry
 end
 
@@ -148,6 +151,9 @@ function SettingsDialog.refreshTestWindow()
         if singleFile and entry and entry.family then
             -- names above heads / combat numbers use one file even with the mix
             drawingEntry = ns:ResolveFont("bundled:worldsans")
+        elseif singleFile and entry and entry.autoMix then
+            -- one file there, so no automatic Han: show the truth for names above heads
+            drawingEntry = entry
         end
         local statusText, color = SettingsDialog.testStatus(drawingEntry, line.key)
         row.status:SetText(statusText)

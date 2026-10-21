@@ -67,7 +67,9 @@ function ns:FontCatalog()
     local list = {}
     for _, font in ipairs(self.BUNDLED_FONTS) do
         local hasHan = (self:FontCoverage(font, "chinese") or 0) > 0.99
-        list[#list + 1] = { id = "bundled:" .. font.id, name = font.name, file = font.file, path = self.FONT_PATH .. font.file, source = "bundled", multilingual = hasHan }
+        -- fonts without Han get World Sans for Chinese automatically (see ns:UsesFamily)
+        list[#list + 1] = { id = "bundled:" .. font.id, name = font.name, file = font.file, path = self.FONT_PATH .. font.file,
+            source = "bundled", multilingual = hasHan, autoMix = not hasHan }
     end
     for _, custom in ipairs(self:CustomFontFiles()) do
         list[#list + 1] = { id = "custom:" .. custom.file, name = (custom.file:gsub("%.[OoTt][Tt][Ff]$", "")), path = self:CustomFontPath(custom.file), source = "custom", auto = custom.auto }

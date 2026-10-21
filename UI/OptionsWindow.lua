@@ -25,8 +25,12 @@ function SettingsDialog.createButton(parent, width, height, text, onClick)
     button:SetSize(width, height)
     ns.UIKit:ApplySurface(button, Theme.bgSecondary, Theme.border)
     button.label = button:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
-    button.label:SetPoint("LEFT", 8, 0)
-    button.label:SetPoint("RIGHT", -8, 0)
+    if width < 40 then
+        button.label:SetPoint("CENTER")   -- x / + / - buttons: no room for side insets
+    else
+        button.label:SetPoint("LEFT", 8, 0)
+        button.label:SetPoint("RIGHT", -8, 0)
+    end
     button.label:SetWordWrap(false)
     button.label:SetText(text or "")
     button:SetScript("OnEnter", function(self) self:SetBackdropBorderColor(unpack(Theme.accent)) end)
@@ -46,10 +50,10 @@ end
 -----------------------------------------------------------------------------
 -- Draws a font name in its own face; family entries use the family object
 function SettingsDialog.renderFontSample(fontString, entry, targetKey, size)
-    if entry and entry.family then
-        local family = ns:GetFamilyFont(targetKey, size, "")
+    if ns:UsesFamily(entry) then
+        local family = ns:GetFamilyFont(targetKey, size, "", entry)
         if family and pcall(fontString.SetFontObject, fontString, family) then return end
-        SettingsDialog.setFontSafely(fontString, ns:FamilyPrimaryPath(targetKey), size)
+        SettingsDialog.setFontSafely(fontString, entry.family and ns:FamilyPrimaryPath(targetKey) or entry.path, size)
         return
     end
     SettingsDialog.setFontSafely(fontString, entry and entry.path or ns:DefaultFontPath(targetKey), size)
