@@ -14,7 +14,11 @@ local CLIENT_ALPHABET = {
 }
 
 local familyCache = {}        -- ["target|size|flags"] = font family object
-local familySerial = 0        -- family names must be unique, so every build gets a new one
+local familySerial = 0
+-- Named fonts live in the client for the whole game session, past /reload, and
+-- asking for an existing name hands back the old font. A per-load token keeps
+-- every family name new, so a reload never reuses a family built for another font.
+local SESSION_TOKEN = string.format("%x%x", math.floor((GetTime and GetTime() or 0) * 1000) % 0xFFFFFF, math.random(0, 0xFFFF))
 
 function ns:FamilySupported()
     return type(CreateFontFamily) == "function"
@@ -94,7 +98,8 @@ function ns:GetFamilyFont(targetKey, size, flags, entry)
         members[#members + 1] = { alphabet = alphabet, file = file, height = size, flags = flags }
     end
     familySerial = familySerial + 1
-    local ok, family = pcall(CreateFontFamily, "EzWoWFontChangerFamily" .. familySerial, members)
+    local familyName = "EzWoWFontChangerFamily_" .. SESSION_TOKEN .. "_" .. familySerial
+    local ok, family = pcall(CreateFontFamily, familyName, members)
     if ok and family then
         familyCache[cacheKey] = family
         return family

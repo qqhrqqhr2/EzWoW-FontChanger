@@ -75,6 +75,8 @@ SlashCmdList.EZWOWFONTCHANGER = function(message)
     message = (message or ""):lower():gsub("^%s+", ""):gsub("%s+$", "")
     if message == "reset" or message == "초기화" then
         ns:ResetAllTargets()
+    elseif message == "diag" or message == "진단" then
+        ns:ShowFontDiagnostics()
     else
         ns:ToggleOptions()
     end
