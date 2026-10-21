@@ -550,13 +550,6 @@ end
 -----------------------------------------------------------------------------
 -- Addon Language (combo box: click it, then click a language in the list)
 -----------------------------------------------------------------------------
--- Drawn in World Sans so every language name shows on any client, even when
--- the chosen language's letters are missing from the game font.
-function SettingsDialog.languageFont(fontString, size)
-    local entry = ns:ResolveFont("bundled:worldsans")
-    SettingsDialog.setFontSafely(fontString, entry and entry.path, size)
-end
-
 function SettingsDialog.buildLanguageList()
     if languageList then return languageList end
     languageList = CreateFrame("Frame", nil, configFrame, "BackdropTemplate")
@@ -576,8 +569,7 @@ function SettingsDialog.buildLanguageList()
         row.highlight:SetAllPoints()
         row.highlight:SetColorTexture(Theme.accent[1], Theme.accent[2], Theme.accent[3], 0.18)
         row.highlight:Hide()
-        row.text = row:CreateFontString(nil, "OVERLAY")
-        SettingsDialog.languageFont(row.text, 13)
+        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")   -- same font as the rest of the window
         row.text:SetPoint("LEFT", 8, 0)
         row.text:SetPoint("RIGHT", -8, 0)
         row.text:SetJustifyH("LEFT")
@@ -626,7 +618,6 @@ function SettingsDialog.buildLanguageButton()
     button.label:SetPoint("RIGHT", -22, 0)
     button.label:SetJustifyH("LEFT")
     button.fitWidth = LANGUAGE_BUTTON_WIDTH - 30
-    SettingsDialog.languageFont(button.label, 12)
     -- the dropdown arrow: the game's right arrow turned to point down
     button.arrow = button:CreateTexture(nil, "OVERLAY")
     button.arrow:SetSize(12, 12)
@@ -639,7 +630,6 @@ function SettingsDialog.buildLanguageButton()
 
     configFrame.languageLabel = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "RIGHT", button, "LEFT", -6, 0, Theme.textMuted)
     configFrame.languageLabel:SetJustifyH("RIGHT")
-    SettingsDialog.languageFont(configFrame.languageLabel, 12)
 end
 
 function SettingsDialog.refreshLanguageButton()
