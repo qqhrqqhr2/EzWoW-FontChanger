@@ -8,14 +8,23 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 
 ## 한국어
 
-게임 화면을 네 영역으로 나눠 각각 글꼴과 크기를 바꾸는 애드온입니다.
+게임 화면을 다섯 영역으로 나눠 각각 글꼴과 크기를 바꾸는 애드온입니다.
 
 | 영역 | 바뀌는 곳 | 적용 시점 |
 |---|---|---|
 | 게임 전체 UI 글꼴 | 창·버튼·툴팁·퀘스트 글 등 | 바로 |
 | 채팅창 | 채팅 글자, 입력창, 말풍선 | 바로 (크기는 채팅 탭 우클릭 → 글꼴 크기) |
+| 툴팁 | 마우스를 올리면 뜨는 설명 창 | 바로 (게임 UI 글꼴을 따르게 할 수도 있음) |
 | 전투 숫자 | 머리 위로 뜨는 데미지·치유 숫자 | 재접속 후 |
 | 이름표·머리 위 이름 | 이름표, 캐릭터·몬스터 머리 위 이름 | 이름표는 바로, 머리 위 이름은 재접속 후 |
+
+### 화면 미리보기
+
+![글꼴 비교와 기본 글꼴 22종](docs/images/ui_ko.png)
+
+![설정창](docs/images/settings_ko.png)
+
+> 이미지는 애드온 코드의 창 크기·좌표·색상·문구와 실제 포함 글꼴로 재현한 **예시 화면**입니다.
 
 ### 포함된 글꼴
 
@@ -90,7 +99,13 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 
 ## English
 
-Changes the font and size of four parts of the game separately: the game UI, chat, combat numbers, and nameplates / names above heads. Combat numbers and names above heads need a relog to change.
+Changes the font and size of five parts of the game separately: the game UI, chat, tooltips, combat numbers, and nameplates / names above heads. Combat numbers and names above heads need a relog to change.
+
+![Font comparison and the 22 bundled fonts](docs/images/ui_en.png)
+
+![Settings window](docs/images/settings_en.png)
+
+> The images are **example screens** recreated from the addon's window sizes, positions, colors, text and the bundled fonts.
 
 Bundled fonts (modified SIL OFL 1.1 fonts, built by `scripts/build_fonts.py`): each keeps a pretty base font (Pretendard, Gothic A1, Gowun Dodum, NanumGothic, NanumMyeongjo) and fills every missing non-Han letter (accents, Greek, Cyrillic, kana, symbols) from Noto, plus the 8,836 everyday Han characters, so any of them works alone for every language; **EzWoW World Sans** has every Han character. The **Font test** window draws each language with your current settings and reports whether all letters exist.
 
