@@ -37,3 +37,4 @@ Modules\FontFamily.lua
 Modules\FontApplier.lua
 UI\OptionsWindow.lua
 UI\FontTestWindow.lua
+UI\BlizzardPanel.lua

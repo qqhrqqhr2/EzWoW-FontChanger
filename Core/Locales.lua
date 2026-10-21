@@ -67,6 +67,9 @@ ns.Locales.enUS = {
     SRC_auto = "auto",
     CUSTOM_MORE = "...and %d more",
     PICK_SCROLL = "Scroll for more (%d-%d / %d)",
+    PANEL_DESC = "Change the font and size of the game UI, chat, combat numbers and nameplates. 15 bundled fonts show every language without boxes.",
+    PANEL_OPEN = "Open settings",
+    PANEL_HINT = "Slash command: /ezfont  (/ezfont reset: back to game fonts)",
 }
 ns.Locales.koKR = {
     TITLE = "EzWoW - Font Changer",
@@ -130,6 +133,9 @@ ns.Locales.koKR = {
     SRC_auto = "자동",
     CUSTOM_MORE = "외 %d개 더",
     PICK_SCROLL = "휠로 더 보기 (%d-%d / %d)",
+    PANEL_DESC = "게임 UI, 채팅창, 전투 숫자, 이름표의 글꼴과 크기를 바꿉니다. 기본 글꼴 15종은 모든 언어를 상자(□) 없이 표시합니다.",
+    PANEL_OPEN = "설정창 열기",
+    PANEL_HINT = "명령어: /ezfont  (/ezfont reset: 게임 기본 글꼴로)",
 }
 ns.Locales.deDE = {
     TITLE = "EzWoW - Font Changer",
@@ -193,6 +199,9 @@ ns.Locales.deDE = {
     SRC_auto = "auto",
     CUSTOM_MORE = "und %d weitere",
     PICK_SCROLL = "Scrollen für mehr (%d-%d / %d)",
+    PANEL_DESC = "Schriftart und -größe für Oberfläche, Chat, Kampfzahlen und Namensplaketten ändern. 15 mitgelieferte Schriften zeigen jede Sprache ohne Kästchen.",
+    PANEL_OPEN = "Einstellungen öffnen",
+    PANEL_HINT = "Befehl: /ezfont  (/ezfont reset: Spielschriften)",
 }
 ns.Locales.frFR = {
     TITLE = "EzWoW - Font Changer",
@@ -256,6 +265,9 @@ ns.Locales.frFR = {
     SRC_auto = "auto",
     CUSTOM_MORE = "et %d de plus",
     PICK_SCROLL = "Molette pour plus (%d-%d / %d)",
+    PANEL_DESC = "Change la police et la taille de l'interface, du chat, des chiffres de combat et des barres d'info. 15 polices incluses affichent toutes les langues sans carrés.",
+    PANEL_OPEN = "Ouvrir les réglages",
+    PANEL_HINT = "Commande : /ezfont  (/ezfont reset : polices du jeu)",
 }
 ns.Locales.esES = {
     TITLE = "EzWoW - Font Changer",
@@ -319,6 +331,9 @@ ns.Locales.esES = {
     SRC_auto = "auto",
     CUSTOM_MORE = "y %d más",
     PICK_SCROLL = "Rueda para más (%d-%d / %d)",
+    PANEL_DESC = "Cambia la fuente y el tamaño de la interfaz, el chat, los números de combate y las placas. 15 fuentes incluidas muestran todos los idiomas sin cuadros.",
+    PANEL_OPEN = "Abrir ajustes",
+    PANEL_HINT = "Comando: /ezfont  (/ezfont reset: fuentes del juego)",
 }
 ns.Locales.ruRU = {
     TITLE = "EzWoW - Font Changer",
@@ -382,6 +397,9 @@ ns.Locales.ruRU = {
     SRC_auto = "авто",
     CUSTOM_MORE = "и ещё %d",
     PICK_SCROLL = "Колесо — ещё (%d-%d / %d)",
+    PANEL_DESC = "Шрифт и размер интерфейса, чата, цифр боя и индикаторов. 15 встроенных шрифтов показывают все языки без квадратов.",
+    PANEL_OPEN = "Открыть настройки",
+    PANEL_HINT = "Команда: /ezfont  (/ezfont reset: шрифты игры)",
 }
 ns.Locales.zhCN = {
     TITLE = "EzWoW - Font Changer",
@@ -445,6 +463,9 @@ ns.Locales.zhCN = {
     SRC_auto = "自动",
     CUSTOM_MORE = "另有 %d 个",
     PICK_SCROLL = "滚轮查看更多 (%d-%d / %d)",
+    PANEL_DESC = "更改游戏界面、聊天、战斗数字与姓名板的字体和大小。内置 15 款字体可无方框显示所有语言。",
+    PANEL_OPEN = "打开设置",
+    PANEL_HINT = "命令：/ezfont （/ezfont reset：恢复游戏字体）",
 }
 ns.Locales.zhTW = {
     TITLE = "EzWoW - Font Changer",
@@ -508,6 +529,9 @@ ns.Locales.zhTW = {
     SRC_auto = "自動",
     CUSTOM_MORE = "另有 %d 個",
     PICK_SCROLL = "滾輪查看更多 (%d-%d / %d)",
+    PANEL_DESC = "更改遊戲介面、聊天、戰鬥數字與名條的字型和大小。內建 15 款字型可無方框顯示所有語言。",
+    PANEL_OPEN = "開啟設定",
+    PANEL_HINT = "指令：/ezfont （/ezfont reset：恢復遊戲字型）",
 }
 
 function ns:L(key)

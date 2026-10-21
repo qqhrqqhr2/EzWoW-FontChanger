@@ -212,6 +212,7 @@ eventFrame:SetScript("OnEvent", function(_, event, loadedName)
         end
     elseif event == "PLAYER_LOGIN" then
         ns:RegisterSharedMediaFonts()   -- in case SharedMedia loaded after us
+        if ns.RegisterBlizzardOptions then ns:RegisterBlizzardOptions() end
         FontApplier.collectFontObjects()
         ns:ApplyAll()
         if FCF_SetChatWindowFontSize then
