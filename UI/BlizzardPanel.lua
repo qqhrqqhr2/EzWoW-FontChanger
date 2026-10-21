@@ -6,13 +6,13 @@ local _, ns = ...
 local type, pairs, ipairs, tonumber, tostring, select, pcall = type, pairs, ipairs, tonumber, tostring, select, pcall
 
 local Theme = ns.UIKit.Theme
+local PANEL_TITLE = "EzWoW - Font Changer"
 local optionsPanel
 
 function ns:RegisterBlizzardOptions()
     if optionsPanel then return end
     optionsPanel = CreateFrame("Frame", "EzWoWFontChangerOptionsPanel", UIParent)
-    local panelTitle = ns:L("TITLE")
-    optionsPanel.name = panelTitle
+    optionsPanel.name = PANEL_TITLE
 
     local icon = optionsPanel:CreateTexture(nil, "ARTWORK")
     icon:SetSize(32, 32)
@@ -21,7 +21,7 @@ function ns:RegisterBlizzardOptions()
 
     local heading = optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontNormalLarge")
     heading:SetPoint("LEFT", icon, "RIGHT", 10, 0)
-    heading:SetText(panelTitle)
+    heading:SetText(PANEL_TITLE)
     heading:SetTextColor(unpack(Theme.accent))
 
     local desc = optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -60,7 +60,7 @@ function ns:RegisterBlizzardOptions()
     optionsPanel:SetScript("OnShow", optionsPanel.refreshText)
 
     if Settings and type(Settings.RegisterCanvasLayoutCategory) == "function" and type(Settings.RegisterAddOnCategory) == "function" then
-        local ok, category = pcall(Settings.RegisterCanvasLayoutCategory, optionsPanel, panelTitle)
+        local ok, category = pcall(Settings.RegisterCanvasLayoutCategory, optionsPanel, PANEL_TITLE)
         if ok and category then pcall(Settings.RegisterAddOnCategory, category) end
     elseif type(InterfaceOptions_AddCategory) == "function" then
         pcall(InterfaceOptions_AddCategory, optionsPanel)

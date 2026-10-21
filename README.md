@@ -1,4 +1,4 @@
-# EzWoW - 안깨져 폰트 체인저 / No-Break Font Changer (`EzWoW-FontChanger`)
+# EzWoW - Font Changer (`EzWoW-FontChanger`)
 
 **[한국어](#한국어) · [English](#english)**
 

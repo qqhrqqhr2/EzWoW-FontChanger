@@ -1,15 +1,15 @@
 ## Interface: 16001
 ## X-Curse-Project-ID: 0
-## Title: EzWoW - No-Break Font Changer
-## Title-enUS: EzWoW - No-Break Font Changer
-## Title-koKR: EzWoW - 안깨져 폰트 체인저
-## Title-deDE: EzWoW - No-Break Font Changer
-## Title-frFR: EzWoW - No-Break Font Changer
-## Title-esES: EzWoW - No-Break Font Changer
-## Title-esMX: EzWoW - No-Break Font Changer
-## Title-ruRU: EzWoW - No-Break Font Changer
-## Title-zhCN: EzWoW - 不乱码字体
-## Title-zhTW: EzWoW - 不亂碼字型
+## Title: EzWoW - Font Changer
+## Title-enUS: EzWoW - Font Changer
+## Title-koKR: EzWoW - Font Changer
+## Title-deDE: EzWoW - Font Changer
+## Title-frFR: EzWoW - Font Changer
+## Title-esES: EzWoW - Font Changer
+## Title-esMX: EzWoW - Font Changer
+## Title-ruRU: EzWoW - Font Changer
+## Title-zhCN: EzWoW - Font Changer
+## Title-zhTW: EzWoW - Font Changer
 ## Notes: Change fonts and sizes for the game UI, chat, combat numbers and nameplates (/ezfont)
 ## Notes-enUS: Change fonts and sizes for the game UI, chat, combat numbers and nameplates (/ezfont)
 ## Notes-koKR: 게임 UI, 채팅창, 전투 숫자, 이름표의 글꼴과 크기를 바꿉니다 (/ezfont)
