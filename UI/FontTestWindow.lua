@@ -27,7 +27,7 @@ local testTargetKey = "chat"
 -- Font that will draw this language for the target, as a catalog entry (nil = game font)
 function SettingsDialog.testEntryFor(targetKey, line)
     local cfg = ns:TargetConfig(targetKey)
-    local entry = ns:ResolveFont(cfg.font)
+    local entry = ns:TargetFontEntry(targetKey)
     if entry and entry.family then
         local memberId = ns.db.family[line.alphabet]
         return memberId and memberId ~= "default" and ns:ResolveFont(memberId) or nil
@@ -126,7 +126,7 @@ end
 function SettingsDialog.renderTargetFont(fontString, targetKey)
     local cfg = ns:TargetConfig(targetKey)
     local scale = targetKey == "chat" and 1 or (cfg.scale or 100) / 100
-    SettingsDialog.renderFontSample(fontString, ns:ResolveFont(cfg.font), targetKey, math.floor(SAMPLE_SIZE * scale + 0.5))
+    SettingsDialog.renderFontSample(fontString, ns:TargetFontEntry(targetKey), targetKey, math.floor(SAMPLE_SIZE * scale + 0.5))
 end
 
 function SettingsDialog.refreshTestPreview()
@@ -141,7 +141,7 @@ function SettingsDialog.refreshTestWindow()
     testFrame.title:SetText(ns:L("TEST_TITLE"))
     testFrame.hint:SetText(ns:L("TEST_HINT"))
     testFrame.inputLabel:SetText(ns:L("TEST_INPUT"))
-    local entry = ns:ResolveFont(ns:TargetConfig(testTargetKey).font)
+    local entry = ns:TargetFontEntry(testTargetKey)
     SettingsDialog.setButtonText(testFrame.targetButton, string.format(ns:L("TEST_TARGET"), ns:L("TARGET_" .. testTargetKey), entry and entry.name or ns:L("FONT_DEFAULT")))
     local singleFile = testTargetKey == "combat" or testTargetKey == "nameplate"
     for index, line in ipairs(TEST_LINES) do

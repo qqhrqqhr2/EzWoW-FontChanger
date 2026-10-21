@@ -25,6 +25,7 @@ local fontIdAtLoad = {}        -- [targetKey] = font id applied to the load-time
 local objectsByTarget          -- [targetKey] = { fontObject, ... }
 
 function FontApplier.classify(objectName)
+    if objectName:find("Tooltip", 1, true) then return "tooltip" end
     if CHAT_FONT_OBJECTS[objectName] then return "chat" end
     if COMBAT_FONT_OBJECTS[objectName] then return "combat" end
     if objectName:find("NamePlate", 1, true) then return "nameplate" end
@@ -32,7 +33,7 @@ function FontApplier.classify(objectName)
 end
 
 function FontApplier.collectFontObjects()
-    objectsByTarget = { ui = {}, chat = {}, combat = {}, nameplate = {} }
+    objectsByTarget = { ui = {}, chat = {}, tooltip = {}, combat = {}, nameplate = {} }
     local names = {}
     if GetFonts then
         names = GetFonts() or {}
@@ -119,9 +120,82 @@ function FontApplier.chatFrames()
     return frames
 end
 
+-- Edit boxes can inherit CENTER from a shared font object. Applying a font
+-- family preserves that inherited value, so chat input needs an explicit LEFT.
+function FontApplier.applyToChatInput(editBox)
+    if not (editBox and editBox.SetJustifyH) then return end
+    local cfg = ns:TargetConfig("chat")
+    local entry = ns:ResolveFont(cfg.font)
+    pcall(FontApplier.applyToChatFrame, editBox, entry)
+    pcall(editBox.SetJustifyH, editBox, "LEFT")
+    if editBox.HookScript and not editBox.ezFontInputHooked then
+        editBox.ezFontInputHooked = true
+        editBox:HookScript("OnShow", FontApplier.applyToChatInput)
+        editBox:HookScript("OnEditFocusGained", FontApplier.applyToChatInput)
+    end
+end
+
+function FontApplier.refreshChatInputs()
+    local seen = {}
+    local function apply(editBox)
+        if editBox and not seen[editBox] then
+            seen[editBox] = true
+            FontApplier.applyToChatInput(editBox)
+        end
+    end
+    for index = 1, (NUM_CHAT_WINDOWS or 10) do
+        local frame = _G["ChatFrame" .. index]
+        apply(frame and frame.editBox)
+        apply(_G["ChatFrame" .. index .. "EditBox"])
+    end
+    for _, frame in ipairs(FontApplier.chatFrames()) do apply(frame.editBox) end
+    if ChatEdit_GetActiveWindow then apply(ChatEdit_GetActiveWindow()) end
+end
+
+-- Tooltip lines can have a local font left over from an earlier style pass.
+-- Updating GameTooltipHeaderText alone does not update those local overrides.
+function FontApplier.applyToTooltip(tip)
+    if not (ns.db and tip and tip.GetName and tip.NumLines) then return end
+    if tip.IsForbidden and tip:IsForbidden() then return end
+    local name = tip:GetName()
+    if not name then return end
+    local entry = ns:TargetFontEntry("tooltip")
+    local scale = (tonumber(ns:TargetConfig("tooltip").scale) or 100) / 100
+    local function apply(region)
+        if not (region and region.GetFont and region.SetFont) then return end
+        if not entry and scale == 1 and not originalFonts[region] then return end
+        -- A line inheriting a shared tooltip font is already scaled. Start from
+        -- that object's original size instead of multiplying the scale twice.
+        if not originalFonts[region] and region.GetFontObject then
+            local object = region:GetFontObject()
+            local saved = object and originalFonts[object]
+            if saved and object.GetFont then
+                local path, size = region:GetFont()
+                local objectPath, objectSize = object:GetFont()
+                if path == objectPath and size == objectSize then
+                    originalFonts[region] = { path = saved.path, size = saved.size, flags = saved.flags }
+                end
+            end
+        end
+        FontApplier.applyToObject(region, entry, scale, "tooltip")
+    end
+    for index = 1, tip:NumLines() do
+        pcall(apply, _G[name .. "TextLeft" .. index])
+        pcall(apply, _G[name .. "TextRight" .. index])
+    end
+end
+
+function FontApplier.hookTooltip()
+    local tip = _G.GameTooltip
+    if not (tip and tip.Show) or tip.ezFontTooltipHooked then return end
+    tip.ezFontTooltipHooked = true
+    -- OnShow alone misses updates while the tooltip remains visible.
+    hooksecurefunc(tip, "Show", FontApplier.applyToTooltip)
+end
+
 function ns:ApplyTarget(targetKey)
     local cfg = self:TargetConfig(targetKey)
-    local entry = self:ResolveFont(cfg.font)
+    local entry = self:TargetFontEntry(targetKey)
     local scale = (tonumber(cfg.scale) or 100) / 100
     if not objectsByTarget then FontApplier.collectFontObjects() end
     for _, fontObject in ipairs(objectsByTarget[targetKey] or {}) do
@@ -132,6 +206,9 @@ function ns:ApplyTarget(targetKey)
             pcall(FontApplier.applyToChatFrame, chatFrame, entry)
         end
     end
+    if targetKey == "ui" or targetKey == "chat" then FontApplier.refreshChatInputs() end
+    if targetKey == "ui" and self:TargetConfig("tooltip").font == "inherit" then self:ApplyTarget("tooltip") end
+    if targetKey == "tooltip" and GameTooltip and GameTooltip:IsShown() then FontApplier.applyToTooltip(GameTooltip) end
 end
 
 function ns:ApplyAll()
@@ -162,7 +239,7 @@ end
 function ns:ResetAllTargets()
     for _, targetKey in ipairs(self.TARGET_ORDER) do
         local cfg = self:TargetConfig(targetKey)
-        cfg.font, cfg.scale = "default", 100
+        cfg.font, cfg.scale = self.DEFAULTS.targets[targetKey].font, 100
     end
     self:ApplyAll()
     if self.RefreshOptions then self:RefreshOptions() end
@@ -212,6 +289,7 @@ eventFrame:SetScript("OnEvent", function(_, event, loadedName)
         end
     elseif event == "PLAYER_LOGIN" then
         ns:RegisterSharedMediaFonts()   -- in case SharedMedia loaded after us
+        FontApplier.hookTooltip()
         if ns.RegisterBlizzardOptions then ns:RegisterBlizzardOptions() end
         FontApplier.collectFontObjects()
         ns:ApplyAll()
@@ -220,6 +298,9 @@ eventFrame:SetScript("OnEvent", function(_, event, loadedName)
         end
         if FCF_OpenTemporaryWindow then
             hooksecurefunc("FCF_OpenTemporaryWindow", function() ns:ApplyTarget("chat") end)
+        end
+        if ChatEdit_ActivateChat then
+            hooksecurefunc("ChatEdit_ActivateChat", FontApplier.applyToChatInput)
         end
         local driver = _G.NamePlateDriverFrame
         if driver and driver.UpdateNamePlateOptions then
@@ -233,7 +314,7 @@ function ns:DefaultFontPath(targetKey)
     if targetKey == "combat" then
         return originalGlobals.DAMAGE_TEXT_FONT or DAMAGE_TEXT_FONT or STANDARD_TEXT_FONT
     end
-    local sampleName = ({ ui = "GameFontHighlight", chat = "ChatFontNormal", nameplate = "SystemFont_NamePlate" })[targetKey]
+    local sampleName = ({ ui = "GameFontHighlight", chat = "ChatFontNormal", tooltip = "GameTooltipText", nameplate = "SystemFont_NamePlate" })[targetKey]
     local sample = sampleName and _G[sampleName]
     if sample and sample.GetFont then
         local saved = originalFonts[sample]

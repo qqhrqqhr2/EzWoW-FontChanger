@@ -43,9 +43,7 @@ function ns:RegisterBlizzardOptions()
     open:SetScript("OnMouseDown", function(self) self.label:SetPoint("CENTER", 1, -1) end)
     open:SetScript("OnMouseUp", function(self) self.label:SetPoint("CENTER", 0, 0) end)
     open:SetScript("OnClick", function()
-        -- the game settings window sits above ours; close it so the window is visible
-        if SettingsPanel and SettingsPanel:IsShown() and HideUIPanel then pcall(HideUIPanel, SettingsPanel) end
-        ns:ToggleOptions()
+        ns:OpenOptions()
     end)
 
     local hint = optionsPanel:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")

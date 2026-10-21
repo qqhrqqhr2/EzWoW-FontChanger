@@ -9,13 +9,13 @@ local SettingsDialog = ns.SettingsDialog or {}
 ns.SettingsDialog = SettingsDialog
 
 local Theme = ns.UIKit.Theme
-local WINDOW_WIDTH = 480
-local BLOCK_TOP, BLOCK_HEIGHT = -64, 88
+local WINDOW_WIDTH = 520
+local BLOCK_TOP, BLOCK_HEIGHT = -112, 84
 local PREVIEW_SIZE = 15
 local CUSTOM_ROWS = 5
-local PICKER_ROWS = 16
+local PICKER_ROWS = 8
 
-local configFrame, pickerFrame
+local configFrame, pickerFrame, advancedFrame
 
 -----------------------------------------------------------------------------
 -- Widgets
@@ -72,6 +72,7 @@ end
 
 -- Picker / list help for one font: style plus what it can show
 function SettingsDialog.fontTip(entry)
+    if entry and entry.inherit then return ns:L("TIP_TOOLTIP_INHERIT") end
     if not entry or entry.id == "default" then return ns:L("TIP_FONT_default") end
     if entry.family then return ns:L("TIP_FAMILY") end
     local lines = { entry.name }
@@ -116,6 +117,7 @@ function SettingsDialog.buildPicker()
     pickerFrame:SetFrameLevel(configFrame:GetFrameLevel() + 40)
     pickerFrame:EnableMouse(true)
     pickerFrame:EnableMouseWheel(true)
+    pickerFrame:SetClampedToScreen(true)
     ns.UIKit:ApplySurface(pickerFrame, Theme.bgPrimary, Theme.accent)
     pickerFrame.title = ns.UIKit:CreateLabel(pickerFrame, "GameFontNormal", "TOPLEFT", pickerFrame, "TOPLEFT", 12, -10, Theme.accent, ns:L("PICK_TITLE"))
     pickerFrame.scrollHint = ns.UIKit:CreateLabel(pickerFrame, "GameFontDisableSmall", "BOTTOMRIGHT", pickerFrame, "BOTTOMRIGHT", -12, 10, Theme.textMuted)
@@ -136,7 +138,7 @@ function SettingsDialog.buildPicker()
         row.tag = ns.UIKit:CreateLabel(row, "GameFontDisableSmall", "RIGHT", row, "RIGHT", -6, 0, Theme.textMuted)
         row:SetScript("OnEnter", function(self)
             self.highlight:Show()
-            local entry = self.fontId == "default" and { id = "default" } or ns:ResolveFont(self.fontId)
+            local entry = self.fontId == "inherit" and { inherit = true } or (self.fontId == "default" and { id = "default" } or ns:ResolveFont(self.fontId))
             SettingsDialog.showTip(self, SettingsDialog.fontTip(entry))
         end)
         row:SetScript("OnLeave", function(self)
@@ -173,7 +175,7 @@ function SettingsDialog.fillPicker()
     pickerFrame.scrollHint:SetText(total > PICKER_ROWS and string.format(ns:L("PICK_SCROLL"),
         pickerFrame.offset + 1, math.min(total, pickerFrame.offset + PICKER_ROWS), total) or "")
     local selectedId = pickerFrame.selectedId
-    if not selectedId or (selectedId ~= "default" and not ns:ResolveFont(selectedId)) then selectedId = "default" end
+    if selectedId and selectedId ~= "default" and selectedId ~= "inherit" and not ns:ResolveFont(selectedId) then selectedId = "default" end
     for index, row in ipairs(pickerFrame.rows) do
         local entry = pickerFrame.entries[index + pickerFrame.offset]
         if entry then
@@ -210,6 +212,7 @@ function SettingsDialog.openPicker(opts)
     pickerFrame.isMember = opts.isMember
     pickerFrame.onSelect = opts.onSelect
     pickerFrame.entries = { { id = "default", name = ns:L("FONT_DEFAULT") } }
+    if opts.includeInherit then table.insert(pickerFrame.entries, 1, { id = "inherit", name = ns:L("FONT_INHERIT_UI"), inherit = true }) end
     local familyEntry = opts.includeFamily and ns:FamilyEntry()
     if familyEntry then pickerFrame.entries[#pickerFrame.entries + 1] = familyEntry end
     for _, entry in ipairs(ns:FontCatalog()) do pickerFrame.entries[#pickerFrame.entries + 1] = entry end
@@ -225,11 +228,34 @@ end
 function SettingsDialog.openTargetPicker(targetKey, anchor)
     SettingsDialog.openPicker({
         key = "target:" .. targetKey, anchor = anchor, previewTarget = targetKey, includeFamily = true,
+        includeInherit = targetKey == "tooltip",
         selectedId = ns:TargetConfig(targetKey).font,
         onSelect = function(fontId)
             ns:TargetConfig(targetKey).font = fontId
             ns:ApplyTarget(targetKey)
         end,
+    })
+end
+
+function SettingsDialog.applyFontToAll(fontId)
+    for _, targetKey in ipairs(ns.TARGET_ORDER) do
+        ns:TargetConfig(targetKey).font = fontId
+        ns:ApplyTarget(targetKey)
+    end
+    ns:RefreshOptions()
+end
+
+function SettingsDialog.resetTarget(targetKey)
+    local cfg = ns:TargetConfig(targetKey)
+    cfg.font, cfg.scale = ns.DEFAULTS.targets[targetKey].font, 100
+    ns:ApplyTarget(targetKey)
+    ns:RefreshOptions()
+end
+
+function SettingsDialog.openAllFontPicker(anchor)
+    SettingsDialog.openPicker({
+        key = "all", anchor = anchor, previewTarget = "chat", includeFamily = false,
+        selectedId = false, onSelect = SettingsDialog.applyFontToAll,
     })
 end
 
@@ -245,6 +271,7 @@ function SettingsDialog.buildFamilyWindow()
     familyFrame:SetPoint("TOPLEFT", configFrame, "TOPRIGHT", 8, 0)
     familyFrame:SetFrameLevel(configFrame:GetFrameLevel() + 10)
     familyFrame:EnableMouse(true)
+    familyFrame:SetClampedToScreen(true)
     ns.UIKit:ApplySurface(familyFrame, Theme.bgPrimary, Theme.accent)
     familyFrame.title = ns.UIKit:CreateLabel(familyFrame, "GameFontNormal", "TOPLEFT", familyFrame, "TOPLEFT", 16, -14, Theme.accent)
     familyFrame.hint = ns.UIKit:CreateLabel(familyFrame, "GameFontHighlightSmall", "TOPLEFT", familyFrame, "TOPLEFT", 16, -34, Theme.textMuted)
@@ -322,11 +349,15 @@ function SettingsDialog.buildTargetBlock(targetKey, index)
     local top = BLOCK_TOP - (index - 1) * BLOCK_HEIGHT
     local block = {}
     block.title = ns.UIKit:CreateLabel(configFrame, "GameFontNormal", "TOPLEFT", configFrame, "TOPLEFT", 20, top, Theme.accent)
+    block.title:SetWidth(280)
+    block.title:SetWordWrap(false)
+    SettingsDialog.attachTip(block.title, "TIP_" .. targetKey)
     block.note = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "TOPRIGHT", configFrame, "TOPRIGHT", -20, top - 1, Theme.warning)
-    block.note:SetWidth(250)
+    block.note:SetWidth(180)
+    block.note:SetWordWrap(false)
     block.note:SetJustifyH("RIGHT")
 
-    block.fontButton = SettingsDialog.createButton(configFrame, 250, 26, "", function(self)
+    block.fontButton = SettingsDialog.createButton(configFrame, 286, 26, "", function(self)
         SettingsDialog.openTargetPicker(targetKey, self)
     end)
     block.fontButton:SetPoint("TOPLEFT", 20, top - 20)
@@ -338,14 +369,23 @@ function SettingsDialog.buildTargetBlock(targetKey, index)
         ns:ApplyTarget(targetKey)
         ns:RefreshOptions()
     end
-    block.sizeLabel = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "TOPLEFT", configFrame, "TOPLEFT", 290, top - 27, Theme.textMuted, ns:L("SIZE"))
+    block.sizeLabel = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "TOPLEFT", configFrame, "TOPLEFT", 316, top - 27, Theme.textMuted, ns:L("SIZE"))
     block.minus = SettingsDialog.createButton(configFrame, 26, 26, "-", function() stepScale(-ns.SCALE_STEP) end)
-    block.minus:SetPoint("TOPLEFT", 340, top - 20)
-    block.value = ns.UIKit:CreateLabel(configFrame, "GameFontHighlight", "TOPLEFT", configFrame, "TOPLEFT", 368, top - 26, Theme.textBody)
-    block.value:SetWidth(52)
-    block.value:SetJustifyH("CENTER")
+    block.minus:SetPoint("TOPLEFT", 356, top - 20)
+    block.value = SettingsDialog.createButton(configFrame, 52, 26, "", function()
+        ns:TargetConfig(targetKey).scale = 100
+        ns:ApplyTarget(targetKey)
+        ns:RefreshOptions()
+    end)
+    block.value:SetPoint("TOPLEFT", 384, top - 20)
+    block.value.label:SetJustifyH("CENTER")
+    SettingsDialog.attachTip(block.value, "TIP_SIZE_RESET")
     block.plus = SettingsDialog.createButton(configFrame, 26, 26, "+", function() stepScale(ns.SCALE_STEP) end)
-    block.plus:SetPoint("TOPLEFT", 422, top - 20)
+    block.plus:SetPoint("TOPLEFT", 438, top - 20)
+    block.reset = SettingsDialog.createButton(configFrame, 28, 26, "R", function() SettingsDialog.resetTarget(targetKey) end)
+    block.reset:SetPoint("TOPLEFT", 472, top - 20)
+    block.reset.label:SetJustifyH("CENTER")
+    SettingsDialog.attachTip(block.reset, targetKey == "tooltip" and "TIP_TOOLTIP_RESET" or "TIP_TARGET_RESET")
     SettingsDialog.attachTip(block.minus, "TIP_SIZE")
     SettingsDialog.attachTip(block.plus, "TIP_SIZE")
     block.minus.label:SetJustifyH("CENTER")
@@ -362,11 +402,12 @@ end
 
 function SettingsDialog.refreshTargetBlock(targetKey, block)
     local cfg = ns:TargetConfig(targetKey)
-    local entry = ns:ResolveFont(cfg.font)
+    local entry = ns:TargetFontEntry(targetKey)
     block.title:SetText(ns:L("TARGET_" .. targetKey))
+    ns.UIKit:FitFontString(block.title, 280, 1)
     block.sizeLabel:SetText(ns:L("SIZE"))
-    ns.UIKit:FitFontString(block.sizeLabel, 46, 1)   -- room up to the - button
-    block.fontButton.label:SetText(entry and entry.name or ns:L("FONT_DEFAULT"))
+    ns.UIKit:FitFontString(block.sizeLabel, 36, 1)
+    block.fontButton.label:SetText(cfg.font == "inherit" and ns:L("FONT_INHERIT_UI") or (entry and entry.name or ns:L("FONT_DEFAULT")))
     SettingsDialog.renderFontSample(block.fontButton.label, entry, targetKey, 13)
 
     local chat = targetKey == "chat"
@@ -374,21 +415,20 @@ function SettingsDialog.refreshTargetBlock(targetKey, block)
     block.minus:SetShown(not chat)
     block.plus:SetShown(not chat)
     block.value:SetShown(not chat)
-    block.value:SetText((cfg.scale or 100) .. "%")
+    SettingsDialog.setButtonText(block.value, (cfg.scale or 100) .. "%")
 
     local scale = chat and 1 or (cfg.scale or 100) / 100
     SettingsDialog.renderFontSample(block.preview, entry, targetKey, math.floor(PREVIEW_SIZE * scale + 0.5))
     block.preview:SetText(ns:L("PREVIEW"))
 
     if ns:FontLacksClientScript(entry) then
-        block.note:SetText(ns:L("MISSING_GLYPH"))
+        block.note:SetText(ns:L("MISSING_GLYPH_SHORT"))
     elseif ns:NeedsRelog(targetKey) then
-        block.note:SetText(ns:L("NOTE_RELOG"))
-    elseif chat then
-        block.note:SetText("|cffA7B9C5" .. ns:L("NOTE_CHAT_SIZE") .. "|r")
+        block.note:SetText(ns:L("NOTE_RELOG_SHORT"))
     else
         block.note:SetText("")
     end
+    ns.UIKit:FitFontString(block.note, 180, 1)
 end
 
 -----------------------------------------------------------------------------
@@ -410,7 +450,7 @@ function SettingsDialog.addCustomFont(text)
     end
     table.insert(ns.db.customFonts, { file = file })
     ns:Print(string.format(ns:L("MSG_CUSTOM_OK"), file))
-    configFrame.customInput:SetText("")
+    advancedFrame.customInput:SetText("")
     ns:RefreshOptions()
 end
 
@@ -432,61 +472,64 @@ function SettingsDialog.removeCustomFont(file)
 end
 
 function SettingsDialog.buildCustomSection(top)
-    configFrame.customTitle = ns.UIKit:CreateLabel(configFrame, "GameFontNormal", "TOPLEFT", configFrame, "TOPLEFT", 20, top, Theme.accent)
-    configFrame.customHint = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "TOPLEFT", configFrame, "TOPLEFT", 20, top - 20, Theme.textMuted)
-    configFrame.customHint:SetWidth(WINDOW_WIDTH - 40)
-    configFrame.customHint:SetJustifyH("LEFT")
+    local parent = advancedFrame
+    parent.customTitle = ns.UIKit:CreateLabel(parent, "GameFontNormal", "TOPLEFT", parent, "TOPLEFT", 20, top, Theme.accent)
+    parent.customHint = ns.UIKit:CreateLabel(parent, "GameFontHighlightSmall", "TOPLEFT", parent, "TOPLEFT", 20, top - 20, Theme.textMuted)
+    parent.customHint:SetWidth(WINDOW_WIDTH - 40)
+    parent.customHint:SetJustifyH("LEFT")
 
-    local input = CreateFrame("EditBox", nil, configFrame, "BackdropTemplate")
+    local input = CreateFrame("EditBox", nil, parent, "BackdropTemplate")
     input:SetSize(330, 26)
     input:SetPoint("TOPLEFT", 20, top - 64)
     ns.UIKit:ApplySurface(input, Theme.bgInput, Theme.border)
     input:SetFontObject(ChatFontNormal)
+    input:SetJustifyH("LEFT")
     input:SetTextInsets(8, 8, 0, 0)
     input:SetAutoFocus(false)
     input:SetScript("OnEnterPressed", function(self) SettingsDialog.addCustomFont(self:GetText()) end)
     input:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
     input:SetScript("OnEditFocusGained", function(self) self:SetBackdropBorderColor(unpack(Theme.accent)) end)
     input:SetScript("OnEditFocusLost", function(self) self:SetBackdropBorderColor(unpack(Theme.border)) end)
-    configFrame.customInput = input
+    parent.customInput = input
     SettingsDialog.attachTip(input, "TIP_CUSTOM")
 
-    configFrame.customAdd = SettingsDialog.createButton(configFrame, 100, 26, "", function()
+    parent.customAdd = SettingsDialog.createButton(parent, 100, 26, "", function()
         SettingsDialog.addCustomFont(input:GetText())
     end)
-    configFrame.customAdd:SetPoint("LEFT", input, "RIGHT", 10, 0)
-    SettingsDialog.attachTip(configFrame.customAdd, "TIP_CUSTOM")
-    configFrame.customAdd.label:SetJustifyH("CENTER")
+    parent.customAdd:SetPoint("LEFT", input, "RIGHT", 10, 0)
+    SettingsDialog.attachTip(parent.customAdd, "TIP_CUSTOM")
+    parent.customAdd.label:SetJustifyH("CENTER")
 
-    configFrame.customEmpty = ns.UIKit:CreateLabel(configFrame, "GameFontDisableSmall", "TOPLEFT", configFrame, "TOPLEFT", 22, top - 100, Theme.textMuted)
-    configFrame.customMore = ns.UIKit:CreateLabel(configFrame, "GameFontDisableSmall", "TOPLEFT", configFrame, "TOPLEFT", 22, top - 96 - CUSTOM_ROWS * 24, Theme.textMuted)
-    configFrame.customRows = {}
+    parent.customEmpty = ns.UIKit:CreateLabel(parent, "GameFontDisableSmall", "TOPLEFT", parent, "TOPLEFT", 22, top - 100, Theme.textMuted)
+    parent.customMore = ns.UIKit:CreateLabel(parent, "GameFontDisableSmall", "TOPLEFT", parent, "TOPLEFT", 22, top - 96 - CUSTOM_ROWS * 24, Theme.textMuted)
+    parent.customRows = {}
     for index = 1, CUSTOM_ROWS do
         local rowTop = top - 96 - (index - 1) * 24
         local row = {}
-        row.text = configFrame:CreateFontString(nil, "OVERLAY")
+        row.text = parent:CreateFontString(nil, "OVERLAY")
         row.text:SetPoint("TOPLEFT", 22, rowTop - 4)
         row.text:SetWidth(330)
         row.text:SetJustifyH("LEFT")
         row.text:SetWordWrap(false)
-        row.remove = SettingsDialog.createButton(configFrame, 100, 22, "", function()
+        row.remove = SettingsDialog.createButton(parent, 100, 22, "", function()
             SettingsDialog.removeCustomFont(row.file)
         end)
         row.remove:SetPoint("TOPLEFT", 360, rowTop)
         row.remove.label:SetJustifyH("CENTER")
-        configFrame.customRows[index] = row
+        parent.customRows[index] = row
     end
 end
 
 function SettingsDialog.refreshCustomSection()
-    configFrame.customTitle:SetText(ns:L("CUSTOM_TITLE"))
-    configFrame.customHint:SetText(ns:L("CUSTOM_HINT"))
-    SettingsDialog.setButtonText(configFrame.customAdd, ns:L("CUSTOM_ADD"))
+    if not advancedFrame then return end
+    advancedFrame.customTitle:SetText(ns:L("CUSTOM_TITLE"))
+    advancedFrame.customHint:SetText(ns:L("CUSTOM_HINT_SHORT"))
+    SettingsDialog.setButtonText(advancedFrame.customAdd, ns:L("CUSTOM_ADD"))
     local customs = ns:CustomFontFiles()
     local overflow = #customs - CUSTOM_ROWS
-    configFrame.customEmpty:SetText(#customs == 0 and ns:L("CUSTOM_EMPTY") or "")
-    configFrame.customMore:SetText(overflow > 0 and string.format(ns:L("CUSTOM_MORE"), overflow) or "")
-    for index, row in ipairs(configFrame.customRows) do
+    advancedFrame.customEmpty:SetText(#customs == 0 and ns:L("CUSTOM_EMPTY") or "")
+    advancedFrame.customMore:SetText(overflow > 0 and string.format(ns:L("CUSTOM_MORE"), overflow) or "")
+    for index, row in ipairs(advancedFrame.customRows) do
         local custom = customs[index]
         row.file = custom and custom.file
         if custom then
@@ -504,16 +547,51 @@ end
 -----------------------------------------------------------------------------
 -- Window
 -----------------------------------------------------------------------------
+function SettingsDialog.toggleAdvanced()
+    if not advancedFrame then
+        advancedFrame = CreateFrame("Frame", "EzWoWFontChangerAdvanced", configFrame, "BackdropTemplate")
+        SettingsDialog.advancedFrame = advancedFrame
+        advancedFrame:SetSize(WINDOW_WIDTH, 366)
+        advancedFrame:SetPoint("CENTER", configFrame, "CENTER")
+        advancedFrame:SetFrameLevel(configFrame:GetFrameLevel() + 20)
+        advancedFrame:SetClampedToScreen(true)
+        advancedFrame:EnableMouse(true)
+        ns.UIKit:ApplySurface(advancedFrame, Theme.bgPrimary, Theme.accent)
+        advancedFrame.titleText = ns.UIKit:CreateLabel(advancedFrame, "GameFontNormalLarge", "TOPLEFT", advancedFrame, "TOPLEFT", 20, -16, Theme.accent)
+        local close = SettingsDialog.createButton(advancedFrame, 24, 24, "x", function() advancedFrame:Hide() end)
+        close:SetPoint("TOPRIGHT", -10, -10)
+        close.label:SetJustifyH("CENTER")
+        if ns:FamilySupported() then
+            advancedFrame.familyButton = SettingsDialog.createButton(advancedFrame, 230, 28, "", SettingsDialog.toggleFamilyWindow)
+            advancedFrame.familyButton:SetPoint("TOPLEFT", 20, -56)
+            advancedFrame.familyButton.label:SetJustifyH("CENTER")
+            SettingsDialog.attachTip(advancedFrame.familyButton, "TIP_FAMILY")
+        end
+        advancedFrame.testButton = SettingsDialog.createButton(advancedFrame, advancedFrame.familyButton and 240 or 480, 28, "", function() SettingsDialog.toggleTestWindow() end)
+        advancedFrame.testButton:SetPoint("TOPRIGHT", -20, -56)
+        advancedFrame.testButton.label:SetJustifyH("CENTER")
+        SettingsDialog.attachTip(advancedFrame.testButton, "TIP_TEST")
+        SettingsDialog.buildCustomSection(-108)
+        advancedFrame:SetScript("OnHide", function()
+            if familyFrame then familyFrame:Hide() end
+            if pickerFrame then pickerFrame:Hide() end
+        end)
+        tinsert(UISpecialFrames, "EzWoWFontChangerAdvanced")
+        advancedFrame:Hide()
+    end
+    advancedFrame:SetShown(not advancedFrame:IsShown())
+    ns:RefreshOptions()
+end
+
 function SettingsDialog.build()
     if configFrame then return configFrame end
-    local customTop = BLOCK_TOP - #ns.TARGET_ORDER * BLOCK_HEIGHT - 8
-    local height = -customTop + 96 + CUSTOM_ROWS * 24 + 74
 
     configFrame = CreateFrame("Frame", "EzWoWFontChangerSettings", UIParent, "BackdropTemplate")
     SettingsDialog.configFrame = configFrame
-    configFrame:SetSize(WINDOW_WIDTH, height)
+    configFrame:SetSize(WINDOW_WIDTH, 546 + (#ns.TARGET_ORDER - 4) * BLOCK_HEIGHT)
     configFrame:SetPoint("CENTER")
-    configFrame:SetFrameStrata("DIALOG")
+    configFrame:SetFrameStrata("FULLSCREEN_DIALOG")
+    configFrame:SetToplevel(true)
     configFrame:SetClampedToScreen(true)
     configFrame:SetMovable(true)
     configFrame:EnableMouse(true)
@@ -523,6 +601,7 @@ function SettingsDialog.build()
     configFrame:SetScript("OnHide", function()
         if pickerFrame then pickerFrame:Hide() end
         if familyFrame then familyFrame:Hide() end
+        if advancedFrame then advancedFrame:Hide() end
     end)
     ns.UIKit:ApplySurface(configFrame, Theme.bgPrimary, Theme.border)
     tinsert(UISpecialFrames, "EzWoWFontChangerSettings")
@@ -538,30 +617,30 @@ function SettingsDialog.build()
     local close = SettingsDialog.createButton(configFrame, 24, 24, "x", function() configFrame:Hide() end)
     close:SetPoint("TOPRIGHT", -10, -10)
     close.label:SetJustifyH("CENTER")
-    if ns:FamilySupported() then
-        configFrame.familyButton = SettingsDialog.createButton(configFrame, 150, 24, "", SettingsDialog.toggleFamilyWindow)
-        configFrame.familyButton:SetPoint("RIGHT", close, "LEFT", -8, 0)
-        SettingsDialog.attachTip(configFrame.familyButton, "TIP_FAMILY")
-        configFrame.familyButton.label:SetJustifyH("CENTER")
-    end
+    configFrame.allFontButton = SettingsDialog.createButton(configFrame, WINDOW_WIDTH - 40, 28, "", SettingsDialog.openAllFontPicker)
+    configFrame.allFontButton:SetPoint("TOPLEFT", 20, -66)
+    configFrame.allFontButton.label:SetJustifyH("CENTER")
+    SettingsDialog.attachTip(configFrame.allFontButton, "TIP_ALL_FONTS")
 
     configFrame.blocks = {}
     for index, targetKey in ipairs(ns.TARGET_ORDER) do
         configFrame.blocks[targetKey] = SettingsDialog.buildTargetBlock(targetKey, index)
     end
-    SettingsDialog.buildCustomSection(customTop)
+    configFrame.quickHint = ns.UIKit:CreateLabel(configFrame, "GameFontHighlightSmall", "TOPLEFT", configFrame, "TOPLEFT", 20, -450 - (#ns.TARGET_ORDER - 4) * BLOCK_HEIGHT, Theme.textMuted)
+    configFrame.quickHint:SetWidth(WINDOW_WIDTH - 40)
+    configFrame.quickHint:SetJustifyH("LEFT")
 
     configFrame.resetButton = SettingsDialog.createButton(configFrame, 140, 30, "", function() ns:ResetAllTargets() end)
     configFrame.resetButton:SetPoint("BOTTOMLEFT", 20, 16)
-    configFrame.testButton = SettingsDialog.createButton(configFrame, 140, 30, "", function() SettingsDialog.toggleTestWindow() end)
-    configFrame.testButton:SetPoint("BOTTOM", 0, 16)
+    configFrame.advancedButton = SettingsDialog.createButton(configFrame, 140, 30, "", SettingsDialog.toggleAdvanced)
+    configFrame.advancedButton:SetPoint("BOTTOM", 0, 16)
     configFrame.reloadButton = SettingsDialog.createButton(configFrame, 140, 30, "", function() ReloadUI() end)
     configFrame.reloadButton:SetPoint("BOTTOMRIGHT", -20, 16)
-    for _, button in ipairs({ configFrame.resetButton, configFrame.testButton, configFrame.reloadButton }) do
+    for _, button in ipairs({ configFrame.resetButton, configFrame.advancedButton, configFrame.reloadButton }) do
         button.label:SetJustifyH("CENTER")
     end
     SettingsDialog.attachTip(configFrame.resetButton, "TIP_RESET")
-    SettingsDialog.attachTip(configFrame.testButton, "TIP_TEST")
+    SettingsDialog.attachTip(configFrame.advancedButton, "TIP_ADVANCED")
     SettingsDialog.attachTip(configFrame.reloadButton, "TIP_RELOAD")
 
     configFrame:Hide()
@@ -571,18 +650,34 @@ end
 function ns:RefreshOptions()
     if not configFrame or not configFrame:IsShown() then return end
     configFrame.titleText:SetText(self:L("TITLE"))
-    configFrame.subtitle:SetText(self:L("SUBTITLE"))
+    configFrame.subtitle:SetText(self:L("SIMPLE_SUBTITLE"))
+    configFrame.subtitle:SetWidth(WINDOW_WIDTH - 40)
+    configFrame.subtitle:SetWordWrap(false)
+    ns.UIKit:FitFontString(configFrame.subtitle, WINDOW_WIDTH - 40, 1)
+    configFrame.quickHint:SetText(self:L("QUICK_HINT"))
+    SettingsDialog.setButtonText(configFrame.allFontButton, self:L("ALL_FONTS"))
     for targetKey, block in pairs(configFrame.blocks) do
         SettingsDialog.refreshTargetBlock(targetKey, block)
     end
-    SettingsDialog.refreshCustomSection()
     SettingsDialog.setButtonText(configFrame.resetButton, self:L("RESET_ALL"))
     SettingsDialog.setButtonText(configFrame.reloadButton, self:L("RELOAD"))
-    SettingsDialog.setButtonText(configFrame.testButton, self:L("TEST_BUTTON"))
+    SettingsDialog.setButtonText(configFrame.advancedButton, self:L("ADVANCED"))
+    if advancedFrame and advancedFrame:IsShown() then
+        advancedFrame.titleText:SetText(self:L("ADVANCED"))
+        SettingsDialog.setButtonText(advancedFrame.testButton, self:L("TEST_BUTTON"))
+        if advancedFrame.familyButton then SettingsDialog.setButtonText(advancedFrame.familyButton, self:L("FAMILY_BUTTON")) end
+        SettingsDialog.refreshCustomSection()
+    end
     if SettingsDialog.refreshTestWindow then SettingsDialog.refreshTestWindow() end
-    if configFrame.familyButton then SettingsDialog.setButtonText(configFrame.familyButton, self:L("FAMILY_BUTTON")) end
     SettingsDialog.refreshFamilyWindow()
     if pickerFrame and pickerFrame:IsShown() then SettingsDialog.fillPicker() end
+end
+
+function ns:OpenOptions()
+    SettingsDialog.build()
+    configFrame:Show()
+    configFrame:Raise()
+    self:RefreshOptions()
 end
 
 function ns:ToggleOptions()
@@ -590,7 +685,6 @@ function ns:ToggleOptions()
     if configFrame:IsShown() then
         configFrame:Hide()
     else
-        configFrame:Show()
-        self:RefreshOptions()
+        self:OpenOptions()
     end
 end

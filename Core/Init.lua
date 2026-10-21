@@ -16,12 +16,13 @@ ns.CUSTOM_FONT_DIR = "Interface\\AddOns\\EzWoW-MyFonts\\"
 ns.DONATE_URL = "https://buymeacoffee.com/qqhrqqhr2"
 
 -- Each target is one group of game text that gets its own font and size.
-ns.TARGET_ORDER = { "ui", "chat", "combat", "nameplate" }
+ns.TARGET_ORDER = { "ui", "chat", "tooltip", "combat", "nameplate" }
 
 ns.DEFAULTS = {
     targets = {
         ui        = { font = "default", scale = 100 },
         chat      = { font = "default", scale = 100 },
+        tooltip   = { font = "inherit", scale = 100 },
         combat    = { font = "default", scale = 100 },
         nameplate = { font = "default", scale = 100 },
     },
@@ -51,8 +52,11 @@ end
 
 function ns:InitializeDatabase()
     if type(EzWoW_FontChangerDB) ~= "table" then EzWoW_FontChangerDB = {} end
+    local oldTargets = EzWoW_FontChangerDB.targets
+    local addTooltip = oldTargets and not oldTargets.tooltip
     fillDefaults(EzWoW_FontChangerDB, self.DEFAULTS)
     self.db = EzWoW_FontChangerDB
+    if addTooltip then self.db.targets.tooltip.scale = self.db.targets.ui.scale end
     -- fonts renamed since the first test build
     local renamed = self.RENAMED_FONT_IDS or {}
     for _, cfg in pairs(self.db.targets) do cfg.font = renamed[cfg.font] or cfg.font end
@@ -63,6 +67,13 @@ end
 function ns:TargetConfig(targetKey)
     local db = self.db or self:InitializeDatabase()
     return db.targets[targetKey]
+end
+
+function ns:TargetFontEntry(targetKey)
+    local cfg = self:TargetConfig(targetKey)
+    local fontId = cfg.font
+    if targetKey == "tooltip" and fontId == "inherit" then fontId = self:TargetConfig("ui").font end
+    return self:ResolveFont(fontId)
 end
 
 function ns:Print(message)
