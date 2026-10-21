@@ -66,7 +66,7 @@ function ns:TargetConfig(targetKey)
 end
 
 function ns:Print(message)
-    print("|cffF2C46D[EzWoW - Font Changer]|r " .. tostring(message))
+    print("|cffF2C46D[" .. (self.L and self:L("TITLE") or "EzWoW - Font Changer") .. "]|r " .. tostring(message))
 end
 
 SLASH_EZWOWFONTCHANGER1 = "/ezfont"

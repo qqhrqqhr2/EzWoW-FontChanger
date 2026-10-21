@@ -6,7 +6,7 @@ local _, ns = ...
 
 ns.Locales = {}
 ns.Locales.enUS = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - No-Break Font Changer",
     SUBTITLE = "Pick a font and size for each part of the game",
     TARGET_ui = "Game UI text",
     TARGET_chat = "Chat",
@@ -113,7 +113,7 @@ ns.Locales.enUS = {
     FONTDESC_stylish = "Soft, tidy handwriting (Stylish base).",
 }
 ns.Locales.koKR = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - 안깨져 폰트 체인저",
     SUBTITLE = "게임 화면 영역별로 글꼴과 크기를 고릅니다",
     TARGET_ui = "게임 전체 UI 글꼴",
     TARGET_chat = "채팅창",
@@ -220,7 +220,7 @@ ns.Locales.koKR = {
     FONTDESC_stylish = "부드럽고 단정한 손글씨 (스타일리시 바탕).",
 }
 ns.Locales.deDE = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - No-Break Font Changer",
     SUBTITLE = "Schriftart und Größe für jeden Bereich des Spiels wählen",
     TARGET_ui = "Spieloberfläche",
     TARGET_chat = "Chat",
@@ -286,7 +286,7 @@ ns.Locales.deDE = {
     PANEL_HINT = "Befehl: /ezfont  (/ezfont reset: Spielschriften)",
 }
 ns.Locales.frFR = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - No-Break Font Changer",
     SUBTITLE = "Choisissez une police et une taille pour chaque partie du jeu",
     TARGET_ui = "Interface du jeu",
     TARGET_chat = "Discussion",
@@ -352,7 +352,7 @@ ns.Locales.frFR = {
     PANEL_HINT = "Commande : /ezfont  (/ezfont reset : polices du jeu)",
 }
 ns.Locales.esES = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - No-Break Font Changer",
     SUBTITLE = "Elige fuente y tamaño para cada parte del juego",
     TARGET_ui = "Interfaz del juego",
     TARGET_chat = "Chat",
@@ -418,7 +418,7 @@ ns.Locales.esES = {
     PANEL_HINT = "Comando: /ezfont  (/ezfont reset: fuentes del juego)",
 }
 ns.Locales.ruRU = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - No-Break Font Changer",
     SUBTITLE = "Шрифт и размер для каждой части игры",
     TARGET_ui = "Интерфейс игры",
     TARGET_chat = "Чат",
@@ -484,7 +484,7 @@ ns.Locales.ruRU = {
     PANEL_HINT = "Команда: /ezfont  (/ezfont reset: шрифты игры)",
 }
 ns.Locales.zhCN = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - 不乱码字体",
     SUBTITLE = "为游戏各部分选择字体和大小",
     TARGET_ui = "游戏界面文字",
     TARGET_chat = "聊天",
@@ -550,7 +550,7 @@ ns.Locales.zhCN = {
     PANEL_HINT = "命令：/ezfont （/ezfont reset：恢复游戏字体）",
 }
 ns.Locales.zhTW = {
-    TITLE = "EzWoW - Font Changer",
+    TITLE = "EzWoW - 不亂碼字型",
     SUBTITLE = "為遊戲各部分選擇字型和大小",
     TARGET_ui = "遊戲介面文字",
     TARGET_chat = "聊天",
