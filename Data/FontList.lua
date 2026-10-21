@@ -25,6 +25,13 @@ ns.BUNDLED_FONTS = {
     { id = "penscript",   file = "EzWoW-PenScript.ttf",        name = "EzWoW Pen Script" },
     { id = "gaegu",       file = "EzWoW-Gaegu.ttf",            name = "EzWoW Gaegu" },
     { id = "pixel",       file = "EzWoW-Pixel.ttf",            name = "EzWoW Pixel" },
+    { id = "paperlogy",   file = "EzWoW-Paperlogy.ttf",        name = "EzWoW Paperlogy" },
+    { id = "gugi",        file = "EzWoW-Gugi.ttf",             name = "EzWoW Gugi" },
+    { id = "diphylleia",  file = "EzWoW-Diphylleia.ttf",       name = "EzWoW Diphylleia" },
+    { id = "singleday",   file = "EzWoW-SingleDay.ttf",        name = "EzWoW Single Day" },
+    { id = "yeonsung",    file = "EzWoW-YeonSung.ttf",         name = "EzWoW Yeon Sung" },
+    { id = "poorstory",   file = "EzWoW-PoorStory.ttf",        name = "EzWoW Poor Story" },
+    { id = "stylish",     file = "EzWoW-Stylish.ttf",          name = "EzWoW Stylish" },
 }
 
 -- ids from the first test build, mapped to their replacements

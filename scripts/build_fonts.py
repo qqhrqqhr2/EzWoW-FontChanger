@@ -72,6 +72,13 @@ BUILDS = [
     ("EzWoW-Gaegu.ttf",            "EzWoW Gaegu", "Regular", 300, "base_Gaegu.ttf", False),
     ("EzWoW-SongMyung.ttf",        "EzWoW Song Myung", "Regular", 400, "base_SongMyung.ttf", False),
     ("EzWoW-Pixel.ttf",            "EzWoW Pixel", "Regular", 400, "base_Galmuri11.ttf", False),
+    ("EzWoW-Paperlogy.ttf",        "EzWoW Paperlogy", "Medium", 500, "base_Paperlogy-5Medium.ttf", False),
+    ("EzWoW-Gugi.ttf",             "EzWoW Gugi", "Regular", 600, "base_Gugi.ttf", False),
+    ("EzWoW-Diphylleia.ttf",       "EzWoW Diphylleia", "Regular", 400, "base_Diphylleia.ttf", False),
+    ("EzWoW-SingleDay.ttf",        "EzWoW Single Day", "Regular", 500, "base_SingleDay.ttf", False),
+    ("EzWoW-YeonSung.ttf",         "EzWoW Yeon Sung", "Regular", 500, "base_YeonSung.ttf", False),
+    ("EzWoW-PoorStory.ttf",        "EzWoW Poor Story", "Regular", 400, "base_PoorStory.ttf", False),
+    ("EzWoW-Stylish.ttf",          "EzWoW Stylish", "Regular", 500, "base_Stylish.ttf", False),
 ]
 ONLY = set(sys.argv[2:])   # optional: build just these output files
 # dropped while subsetting; variation tables must survive until the weight is instanced

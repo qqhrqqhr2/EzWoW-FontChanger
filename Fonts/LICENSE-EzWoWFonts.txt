@@ -53,6 +53,27 @@ EzWoW Song Myung
 EzWoW Pixel
   Based on Galmuri11. Copyright (c) 2019-2025 Lee Minseo (quiple@quiple.dev).
 
+EzWoW Paperlogy
+  Based on Paperlogy (SIL OFL 1.1, as stated in the font). Copyright © 2024 PT&
+
+EzWoW Gugi
+  Based on Gugi. Copyright (c) 2017 by TAE System & Typefaces Co.. All rights reserved.
+
+EzWoW Diphylleia
+  Based on Diphylleia. Copyright 2022 The Diphylleia Project Authors (https://github.com/JAMO-TYPEFACE/Diphylleia)
+
+EzWoW Single Day
+  Based on Single Day. Copyright 2015 DXKorea Inc. All rights reserved.
+
+EzWoW Yeon Sung
+  Based on Yeon Sung. Copyright 2018 The Yeon Sung Project Authors
+
+EzWoW Poor Story
+  Based on Poor Story. Copyright (c) YoonDesign Inc. All Rights Reserved.
+
+EzWoW Stylish
+  Based on Stylish. Copyright (c) 1992-2018 AsiaSoft Inc. Seoul Korea All Rights Reserved.
+
 Letters the base fonts lack (accents, Greek, Cyrillic, kana, Han, symbols) come from
   Noto Sans, Noto Sans Symbols, Noto Sans Symbols 2:
     Copyright 2022 The Noto Project Authors (https://github.com/notofonts)

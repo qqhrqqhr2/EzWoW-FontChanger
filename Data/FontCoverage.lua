@@ -21,4 +21,11 @@ ns.FONT_COVERAGE = {
     ["EzWoW-Gaegu.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
     ["EzWoW-SongMyung.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
     ["EzWoW-Pixel.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-Paperlogy.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-Gugi.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-Diphylleia.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-SingleDay.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-YeonSung.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-PoorStory.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
+    ["EzWoW-Stylish.ttf"] = { korean = 1.0, latin = 1.0, cyrillic = 1.0, greek = 1.0, chinese = 1.0, japanese = 1.0, symbols = 1.0 },
 }

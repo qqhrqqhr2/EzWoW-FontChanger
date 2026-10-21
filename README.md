@@ -38,6 +38,13 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 | EzWoW Pen Script | 나눔손글씨 펜 | 손글씨 |
 | EzWoW Gaegu | 개구 | 귀여운 손글씨 |
 | EzWoW Pixel | 갈무리11 | 픽셀 (레트로 게임) |
+| EzWoW Paperlogy | 페이퍼로지 | 반듯하고 세련된 고딕 |
+| EzWoW Gugi | 구기 | 개성 있는 굵은 고딕 |
+| EzWoW Diphylleia | 산골짜기 | 우아한 명조 |
+| EzWoW Single Day | 싱글데이 | 동글동글 손글씨 |
+| EzWoW Yeon Sung | 연성 | 굵은 붓 손글씨 |
+| EzWoW Poor Story | 푸어스토리 | 편안한 손글씨 |
+| EzWoW Stylish | 스타일리시 | 단정한 손글씨 |
 
 모두 SIL Open Font License 1.1 글꼴을 고친 것이며, 출처와 라이선스는 `Fonts/LICENSE-EzWoWFonts.txt`, 만드는 방법은 `scripts/build_fonts.py`에 있습니다.
 
