@@ -12,6 +12,9 @@ local Theme = ns.UIKit.Theme
 local WINDOW_WIDTH = 520
 local BLOCK_TOP, BLOCK_HEIGHT = -112, 84
 local PREVIEW_SIZE = 15
+-- Same sample in every language, so each area shows how its font draws
+-- Korean, Latin, Cyrillic, Simplified / Traditional Chinese and Japanese
+local PREVIEW_SAMPLE = "한국어 ABC Русский 简体 繁體 かな 123"
 local CUSTOM_ROWS = 5
 local PICKER_ROWS = 8
 local LANGUAGE_BUTTON_WIDTH, LANGUAGE_LIST_WIDTH, LANGUAGE_ROW_HEIGHT = 160, 200, 22
@@ -422,7 +425,7 @@ function SettingsDialog.refreshTargetBlock(targetKey, block)
 
     local scale = chat and 1 or (cfg.scale or 100) / 100
     SettingsDialog.renderFontSample(block.preview, entry, targetKey, math.floor(PREVIEW_SIZE * scale + 0.5))
-    block.preview:SetText(ns:L("PREVIEW"))
+    block.preview:SetText(PREVIEW_SAMPLE)
 
     if ns:FontLacksClientScript(entry) then
         block.note:SetText(ns:L("MISSING_GLYPH_SHORT"))
