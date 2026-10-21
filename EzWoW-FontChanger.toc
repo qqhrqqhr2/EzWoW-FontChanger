@@ -21,7 +21,7 @@
 ## Notes-zhCN: 更改游戏界面、聊天、战斗数字与姓名板的字体和大小 (/ezfont)
 ## Notes-zhTW: 更改遊戲介面、聊天、戰鬥數字與名條的字型和大小 (/ezfont)
 ## Author: qqhrqqhr2
-## Version: 1.0.0
+## Version: 1.0.1
 ## Category: EzWoW
 ## IconTexture: Interface\AddOns\EzWoW-FontChanger\Media\Icon
 ## SavedVariables: EzWoW_FontChangerDB

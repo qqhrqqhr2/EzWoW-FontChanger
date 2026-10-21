@@ -1,9 +1,4 @@
-# v1.0.0
+# v1.0.1
 
-첫 릴리즈 (First release)
-
-- 게임 UI·채팅·툴팁·전투 숫자·이름표 글꼴과 크기를 따로 바꿉니다. (Separate fonts and sizes for UI, chat, tooltips, combat numbers and nameplates.)
-- 다국어 글꼴 22종 포함: 한글·영어·러시아어·그리스어·일본어·한자 8,836자 이상 → 다른 나라 채팅·이름이 상자(□)로 깨지지 않습니다. (22 bundled multilingual fonts so foreign chat and names no longer turn into boxes.)
-- 사용자 글꼴(EzWoW-MyFonts 폴더), 언어별 조합, 글꼴 테스트, 8개 언어 설정창. (Custom fonts, per-language mix, font test, settings in 8 languages.)
-
-업데이트 후에는 게임을 완전히 껐다 켜야 새 글꼴이 적용됩니다. (Restart the game after updating so the new font files are loaded.)
+- 설정창 오른쪽 위에서 애드온 언어를 고를 수 있습니다: 자동 또는 8개 언어. 상자를 누르고 목록에서 고르면 바로 바뀝니다. (Choose the addon language at the top right of the settings window: Auto or 8 languages.)
+- 영역별 예시 문장이 한국어·영어·러시아어·중국어(간체·번체)·일본어를 함께 보여 줘서, 글꼴 테스트 창을 열지 않아도 깨지는 글자를 바로 확인할 수 있습니다. (Each area's preview mixes Korean, Latin, Cyrillic, Chinese and Japanese, so missing letters show without opening the font test.)
