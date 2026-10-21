@@ -64,10 +64,13 @@ function ns:ApplyMultilingualPreset()
     self:Print(self:L("MSG_PRESET"))
 end
 
--- true when this font is drawn through a family: the per-language mix, or a
--- bundled font without Han that gets World Sans for Chinese automatically
+-- The client draws each alphabet with its own member of a font object, and
+-- SetFont(path) only fills the client language's members: Chinese on a Korean
+-- client keeps an empty member and shows boxes even when the file has Han.
+-- So every chosen font is applied as a family with all members set; a font
+-- without Han gets World Sans for the Chinese members.
 function ns:UsesFamily(entry)
-    return entry ~= nil and (entry.family or entry.autoMix) and self:FamilySupported() or false
+    return entry ~= nil and self:FamilySupported() or false
 end
 
 local CHINESE_ALPHABETS = { simplifiedchinese = true, traditionalchinese = true }
@@ -76,14 +79,14 @@ function ns:GetFamilyFont(targetKey, size, flags, entry)
     if not self:FamilySupported() then return nil end
     size = math.floor((tonumber(size) or 12) + 0.5)
     flags = flags or ""
-    local autoMix = entry and entry.autoMix
-    local cacheKey = (autoMix and entry.id or "mix") .. "|" .. targetKey .. "|" .. size .. "|" .. flags
+    local single = entry and not entry.family     -- one chosen font in every member
+    local cacheKey = (single and entry.id or "mix") .. "|" .. targetKey .. "|" .. size .. "|" .. flags
     if familyCache[cacheKey] then return familyCache[cacheKey] end
-    local hanEntry = autoMix and self:ResolveFont("bundled:worldsans")
+    local hanEntry = single and entry.autoMix and self:ResolveFont("bundled:worldsans")
     local members = {}
     for _, alphabet in ipairs(self.FAMILY_ALPHABETS) do
         local file
-        if autoMix then
+        if single then
             file = (CHINESE_ALPHABETS[alphabet] and hanEntry and hanEntry.path) or entry.path
         else
             file = self:FamilyMemberPath(alphabet, targetKey)

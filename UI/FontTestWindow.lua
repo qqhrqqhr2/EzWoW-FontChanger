@@ -32,7 +32,7 @@ function SettingsDialog.testEntryFor(targetKey, line)
         local memberId = ns.db.family[line.alphabet]
         return memberId and memberId ~= "default" and ns:ResolveFont(memberId) or nil
     end
-    if ns:UsesFamily(entry) and line.key == "chinese" then
+    if entry and entry.autoMix and ns:FamilySupported() and line.key == "chinese" then
         return ns:ResolveFont("bundled:worldsans")   -- automatic Han from World Sans
     end
     return entry
