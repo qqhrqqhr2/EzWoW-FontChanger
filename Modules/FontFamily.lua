@@ -68,13 +68,38 @@ function ns:ApplyMultilingualPreset()
     self:Print(self:L("MSG_PRESET"))
 end
 
--- The client draws each alphabet with its own member of a font object, and
--- SetFont(path) only fills the client language's members: Chinese on a Korean
--- client keeps an empty member and shows boxes even when the file has Han.
--- So every chosen font is applied as a family with all members set; a font
--- without Han gets World Sans for the Chinese members.
+-- A family is used only for the per-language mix (and a font lacking Han, if
+-- one is ever bundled). A single font file is applied with plain SetFont,
+-- which in game draws every alphabet the file contains (checked with
+-- /ezfont diag) and leaves alignment, colour and shadow untouched.
 function ns:UsesFamily(entry)
-    return entry ~= nil and self:FamilySupported() or false
+    return entry ~= nil and (entry.family or entry.autoMix) and self:FamilySupported() or false
+end
+
+-- SetFontObject copies the family's own look (centred text, white, no
+-- shadow) onto the target, e.g. chat turned centred. Keep the target's look.
+local LOOK = {
+    { get = "GetJustifyH", set = "SetJustifyH" },
+    { get = "GetJustifyV", set = "SetJustifyV" },
+    { get = "GetTextColor", set = "SetTextColor" },
+    { get = "GetShadowColor", set = "SetShadowColor" },
+    { get = "GetShadowOffset", set = "SetShadowOffset" },
+    { get = "GetSpacing", set = "SetSpacing" },
+}
+
+function ns:SetFontObjectKeepLook(region, fontObject)
+    local saved = {}
+    for index, field in ipairs(LOOK) do
+        if region[field.get] then
+            local values = { pcall(region[field.get], region) }
+            if values[1] and values[2] ~= nil then saved[index] = { select(2, unpack(values)) } end
+        end
+    end
+    if not pcall(region.SetFontObject, region, fontObject) then return false end
+    for index, field in ipairs(LOOK) do
+        if saved[index] and region[field.set] then pcall(region[field.set], region, unpack(saved[index])) end
+    end
+    return true
 end
 
 local CHINESE_ALPHABETS = { simplifiedchinese = true, traditionalchinese = true }

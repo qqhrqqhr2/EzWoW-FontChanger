@@ -94,7 +94,7 @@ end
 function SettingsDialog.renderFontSample(fontString, entry, targetKey, size)
     if ns:UsesFamily(entry) then
         local family = ns:GetFamilyFont(targetKey, size, "", entry)
-        if family and pcall(fontString.SetFontObject, fontString, family) then return end
+        if family and ns:SetFontObjectKeepLook(fontString, family) then return end
         SettingsDialog.setFontSafely(fontString, entry.family and ns:FamilyPrimaryPath(targetKey) or entry.path, size)
         return
     end

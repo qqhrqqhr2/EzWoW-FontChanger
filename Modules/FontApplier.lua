@@ -82,7 +82,7 @@ function FontApplier.applyToObject(fontObject, entry, scale, targetKey)
     local size = math.floor(saved.size * scale + 0.5)
     local path = entry and entry.path or saved.path
     local family = ns:UsesFamily(entry) and ns:GetFamilyFont(targetKey, size, saved.flags, entry)
-    if family and pcall(fontObject.SetFontObject, fontObject, family) then
+    if family and ns:SetFontObjectKeepLook(fontObject, family) then
         path = nil
     elseif entry and entry.family then
         path = ns:FamilyPrimaryPath(targetKey)
@@ -102,7 +102,7 @@ function FontApplier.applyToChatFrame(chatFrame, entry)
     currentSize, currentFlags = currentSize or saved.size, currentFlags or saved.flags
     if ns:UsesFamily(entry) then
         local family = ns:GetFamilyFont("chat", currentSize, currentFlags, entry)
-        if family and pcall(chatFrame.SetFontObject, chatFrame, family) then return end
+        if family and ns:SetFontObjectKeepLook(chatFrame, family) then return end
         chatFrame:SetFont(entry.family and ns:FamilyPrimaryPath("chat") or entry.path, currentSize, currentFlags)
         return
     end
