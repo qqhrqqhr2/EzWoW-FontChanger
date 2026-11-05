@@ -26,7 +26,7 @@
 ## IconTexture: Interface\AddOns\EzWoW-FontChanger\Media\Icon
 ## SavedVariables: EzWoW_FontChangerDB
 ## AddonCompartmentFunc: EzWoW_FontChanger_OnAddonCompartmentClick
-## OptionalDeps: EzWoW-MyFonts, LibSharedMedia-3.0, SharedMedia
+## OptionalDeps: EzWoW-MyFonts
 
 Core\Init.lua
 Core\UIKit.lua

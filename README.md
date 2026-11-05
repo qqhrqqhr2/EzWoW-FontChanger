@@ -77,7 +77,7 @@ WoW Forever (`Interface: 16001`) · `v1.0.0` · `/ezfont`
 2. **목록 만들기 (원래 이름 그대로)**: 저장소의 `tools/make_myfonts.ps1`을 그 폴더에 넣고 *PowerShell로 실행* 합니다. 파이썬이 있다면 `tools/make_myfonts.py <폴더>`도 됩니다. 폴더 안 모든 `.ttf`/`.otf`가 목록에 들어가고, 글꼴을 바꿀 때마다 다시 실행하면 됩니다.
 3. **직접 입력**: 설정창 **내 글꼴 추가**에 파일 이름을 입력합니다.
 
-다른 애드온이 SharedMedia에 등록한 글꼴도 목록에 함께 나옵니다.
+다른 애드온이 공용 글꼴 목록에 등록한 글꼴도 함께 나옵니다.
 
 ### 나만의 글꼴 만들기 (PC 프로그램)
 
@@ -117,6 +117,6 @@ Bundled fonts (modified SIL OFL 1.1 fonts, built by `scripts/build_fonts.py`): e
 
 **Language**: click the *Language* box at the top right of the settings and pick a language from the list; the addon's windows switch right away. *Automatic* follows the game language.
 
-To use your own font, put `.ttf` files in `Interface/AddOns/EzWoW-MyFonts/`, restart the game, and add the file name under **Add my font**. Fonts registered with SharedMedia by other addons are listed too.
+To use your own font, put `.ttf` files in `Interface/AddOns/EzWoW-MyFonts/`, restart the game, and add the file name under **Add my font**. Fonts that other addons register in the common font list are listed too.
 
 Commands: `/ezfont` (settings), `/ezfont reset` (back to game fonts).

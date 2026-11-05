@@ -62,6 +62,8 @@ function ns:RegisterBlizzardOptions()
         hint:SetText(ns:L("PANEL_HINT"))
     end
     optionsPanel:SetScript("OnShow", optionsPanel.refreshText)
+    -- fill the texts now: the settings window does not always fire OnShow
+    optionsPanel.refreshText()
 
     if Settings and type(Settings.RegisterCanvasLayoutCategory) == "function" and type(Settings.RegisterAddOnCategory) == "function" then
         local ok, category = pcall(Settings.RegisterCanvasLayoutCategory, optionsPanel, PANEL_TITLE)

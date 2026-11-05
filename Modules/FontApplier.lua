@@ -185,12 +185,28 @@ function FontApplier.applyToTooltip(tip)
     end
 end
 
+-- Tooltips that follow the tooltip font setting: the main one, the one opened
+-- from chat links, and the two item comparison tooltips.
+FontApplier.TOOLTIP_NAMES = { "GameTooltip", "ItemRefTooltip", "ShoppingTooltip1", "ShoppingTooltip2" }
+
 function FontApplier.hookTooltip()
-    local tip = _G.GameTooltip
-    if not (tip and tip.Show) or tip.ezFontTooltipHooked then return end
-    tip.ezFontTooltipHooked = true
-    -- OnShow alone misses updates while the tooltip remains visible.
-    hooksecurefunc(tip, "Show", FontApplier.applyToTooltip)
+    for _, tipName in ipairs(FontApplier.TOOLTIP_NAMES) do
+        local tip = _G[tipName]
+        if tip and tip.Show and not tip.ezFontTooltipHooked then
+            tip.ezFontTooltipHooked = true
+            -- OnShow alone misses updates while the tooltip remains visible.
+            hooksecurefunc(tip, "Show", FontApplier.applyToTooltip)
+        end
+    end
+end
+
+function FontApplier.refreshShownTooltips()
+    for _, tipName in ipairs(FontApplier.TOOLTIP_NAMES) do
+        local tip = _G[tipName]
+        if tip and tip.IsShown and tip:IsShown() then
+            pcall(FontApplier.applyToTooltip, tip)
+        end
+    end
 end
 
 function ns:ApplyTarget(targetKey)
@@ -208,7 +224,7 @@ function ns:ApplyTarget(targetKey)
     end
     if targetKey == "ui" or targetKey == "chat" then FontApplier.refreshChatInputs() end
     if targetKey == "ui" and self:TargetConfig("tooltip").font == "inherit" then self:ApplyTarget("tooltip") end
-    if targetKey == "tooltip" and GameTooltip and GameTooltip:IsShown() then FontApplier.applyToTooltip(GameTooltip) end
+    if targetKey == "tooltip" then FontApplier.refreshShownTooltips() end
 end
 
 function ns:ApplyAll()
@@ -301,13 +317,13 @@ eventFrame:SetScript("OnEvent", function(_, event, loadedName)
             ns:InitializeDatabase()
             ns:DetectFolderFonts()   -- before the load-time globals may need a folder font
             FontApplier.applyLoadTimeGlobals()
-            ns:RegisterSharedMediaFonts()
+            ns:RegisterSharedFonts()
         elseif ns.db then
             -- Blizzard load-on-demand UIs and other addons add new font objects
             FontApplier.scheduleRescan()
         end
     elseif event == "PLAYER_LOGIN" then
-        ns:RegisterSharedMediaFonts()   -- in case SharedMedia loaded after us
+        ns:RegisterSharedFonts()   -- in case the shared font library loaded after us
         FontApplier.hookTooltip()
         if ns.RegisterBlizzardOptions then ns:RegisterBlizzardOptions() end
         FontApplier.collectFontObjects()

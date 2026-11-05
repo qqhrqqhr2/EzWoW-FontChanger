@@ -59,11 +59,12 @@ function ns:FontCoverage(entry, coverageKey)
     return coverage and coverage[coverageKey]
 end
 
-local LSM_LOCALE_MASK = {   -- which client locales each alphabet serves (LibSharedMedia bits)
+local LOCALE_MASK = {   -- which client locales each alphabet serves (shared font library bits)
     latin = "LOCALE_BIT_western", korean = "LOCALE_BIT_koKR", cyrillic = "LOCALE_BIT_ruRU",
     chinese = "LOCALE_BIT_zhCN",
 }
 
+-- The shared font library other addons use (optional; looked up at runtime).
 local function sharedMedia()
     local libStub = _G.LibStub
     return libStub and libStub("LibSharedMedia-3.0", true)
@@ -97,15 +98,15 @@ function ns:FontCatalog()
     return list
 end
 
--- Lets other addons that use the shared media registry pick the bundled
+-- Lets other addons that use the shared font library pick the bundled
 -- fonts in their own font menus.
-function ns:RegisterSharedMediaFonts()
+function ns:RegisterSharedFonts()
     local media = sharedMedia()
-    if not (media and media.Register) or self.sharedMediaRegistered then return end
-    self.sharedMediaRegistered = true
+    if not (media and media.Register) or self.sharedFontsRegistered then return end
+    self.sharedFontsRegistered = true
     for _, font in ipairs(self.BUNDLED_FONTS) do
         local mask = 0
-        for coverageKey, bitName in pairs(LSM_LOCALE_MASK) do
+        for coverageKey, bitName in pairs(LOCALE_MASK) do
             if (self:FontCoverage(font, coverageKey) or 0) > 0.99 and media[bitName] then mask = mask + media[bitName] end
         end
         if mask > 0 and (self:FontCoverage(font, "chinese") or 0) > 0.99 and media.LOCALE_BIT_zhTW then mask = mask + media.LOCALE_BIT_zhTW end
