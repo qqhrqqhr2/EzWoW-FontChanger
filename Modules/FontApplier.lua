@@ -246,17 +246,36 @@ function ns:ResetAllTargets()
     self:Print(self:L("MSG_RESET"))
 end
 
--- true when the client can open the file (a fresh FontString has no font
--- until SetFont succeeds, so GetFont tells us whether it loaded)
+-- true when the client can open the file. One probe FontString is reused:
+-- it is first reset to the game's standard font, so a SetFont that fails
+-- leaves that baseline in place and GetFont tells us whether the file loaded.
+local function normalizeFontPath(path)
+    return type(path) == "string" and path:gsub("/", "\\"):lower() or nil
+end
+
 function ns:IsFontFileUsable(path)
+    if type(path) ~= "string" or path == "" then return false end
     if not FontApplier.probeFrame then
         FontApplier.probeFrame = CreateFrame("Frame", nil, UIParent)
         FontApplier.probeFrame:Hide()
     end
-    local probe = FontApplier.probeFrame:CreateFontString(nil, "OVERLAY")
+    local probe = FontApplier.probeString
+    if not probe then
+        probe = FontApplier.probeFrame:CreateFontString(nil, "OVERLAY")
+        FontApplier.probeString = probe
+    end
+    local baseline = originalGlobals.STANDARD_TEXT_FONT or STANDARD_TEXT_FONT
+    local baseLoaded = type(baseline) == "string" and pcall(probe.SetFont, probe, baseline, 12, "") and probe:GetFont()
+    if not baseLoaded then
+        -- Baseline unavailable: fall back to a fresh FontString (no font until SetFont succeeds)
+        local fresh = FontApplier.probeFrame:CreateFontString(nil, "OVERLAY")
+        local okCall, accepted = pcall(fresh.SetFont, fresh, path, 12, "")
+        return okCall and accepted ~= false and fresh:GetFont() ~= nil
+    end
+    if normalizeFontPath(path) == normalizeFontPath(baseline) then return true end
     local okCall, accepted = pcall(probe.SetFont, probe, path, 12, "")
     local loaded = probe:GetFont()
-    return okCall and accepted ~= false and loaded ~= nil
+    return okCall and accepted ~= false and loaded ~= nil and loaded ~= baseLoaded
 end
 
 -----------------------------------------------------------------------------

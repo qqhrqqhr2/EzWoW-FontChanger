@@ -97,7 +97,7 @@ function ns:FontCatalog()
     return list
 end
 
--- Lets other addons (EllesmereUI, ElvUI, WeakAuras ...) pick the bundled
+-- Lets other addons that use the shared media registry pick the bundled
 -- fonts in their own font menus.
 function ns:RegisterSharedMediaFonts()
     local media = sharedMedia()
