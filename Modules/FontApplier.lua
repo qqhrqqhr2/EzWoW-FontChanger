@@ -110,6 +110,31 @@ function FontApplier.applyToChatFrame(chatFrame, entry)
     chatFrame:SetFont(entry and entry.path or saved.path, currentSize, currentFlags)
 end
 
+-- Last font seen on each chat frame right after this addon set it. The chat
+-- tab's font size menu sets the frame font directly (no event), so a change
+-- is noticed by comparing against this from a timer.
+local chatFontSeen = setmetatable({}, { __mode = "k" })
+
+function FontApplier.noteChatFonts()
+    for _, chatFrame in ipairs(FontApplier.chatFrames()) do
+        if chatFrame.GetFont then
+            local path, size = chatFrame:GetFont()
+            chatFontSeen[chatFrame] = path and { path = path, size = size } or nil
+        end
+    end
+end
+
+function FontApplier.chatFontsChanged()
+    for _, chatFrame in ipairs(FontApplier.chatFrames()) do
+        local seen = chatFontSeen[chatFrame]
+        if seen and chatFrame.GetFont then
+            local path, size = chatFrame:GetFont()
+            if path ~= seen.path or size ~= seen.size then return true end
+        end
+    end
+    return false
+end
+
 function FontApplier.chatFrames()
     local frames = {}
     for index = 1, (NUM_CHAT_WINDOWS or 10) do frames[#frames + 1] = _G["ChatFrame" .. index] end
@@ -120,6 +145,36 @@ function FontApplier.chatFrames()
     return frames
 end
 
+-- Hook bookkeeping lives in weak-keyed side tables: fields written onto game
+-- frames would taint them.
+local hookedInputs = setmetatable({}, { __mode = "k" })
+local hookedTooltips = setmetatable({}, { __mode = "k" })
+
+-- Only the edit boxes of the numbered chat windows (1-10) are ever watched.
+-- Whisper window edit boxes (11+) carry secret whisper targets; running addon
+-- code inside their show/focus handling taints the whisper history.
+function FontApplier.isPermanentChatInput(editBox)
+    if not (editBox and editBox.GetName) then return false end
+    local name = editBox:GetName()
+    local index = type(name) == "string" and tonumber(name:match("^ChatFrame(%d+)EditBox$"))
+    return index ~= nil and index <= (NUM_CHAT_WINDOWS or 10)
+end
+
+local inputCallbacksRegistered = false
+function FontApplier.watchChatInputs()
+    if inputCallbacksRegistered then return end
+    -- Callbacks from the client's chat edit box events run isolated from the
+    -- default chat code, unlike script hooks on the edit box itself.
+    if type(EventRegistry) == "table" and type(EventRegistry.RegisterCallback) == "function" then
+        local function onEditBox(_, editBox)
+            if FontApplier.isPermanentChatInput(editBox) then FontApplier.applyToChatInput(editBox) end
+        end
+        local okShow = pcall(EventRegistry.RegisterCallback, EventRegistry, "ChatFrame.OnEditBoxShow", onEditBox, "EzWoWFontChangerInputShow")
+        local okFocus = pcall(EventRegistry.RegisterCallback, EventRegistry, "ChatFrame.OnEditBoxFocusGained", onEditBox, "EzWoWFontChangerInputFocus")
+        inputCallbacksRegistered = okShow or okFocus
+    end
+end
+
 -- Edit boxes can inherit CENTER from a shared font object. Applying a font
 -- family preserves that inherited value, so chat input needs an explicit LEFT.
 function FontApplier.applyToChatInput(editBox)
@@ -128,8 +183,10 @@ function FontApplier.applyToChatInput(editBox)
     local entry = ns:ResolveFont(cfg.font)
     pcall(FontApplier.applyToChatFrame, editBox, entry)
     pcall(editBox.SetJustifyH, editBox, "LEFT")
-    if editBox.HookScript and not editBox.ezFontInputHooked then
-        editBox.ezFontInputHooked = true
+    -- Script hooks only when the edit box callbacks above are unavailable.
+    if not inputCallbacksRegistered and editBox.HookScript and not hookedInputs[editBox]
+        and FontApplier.isPermanentChatInput(editBox) then
+        hookedInputs[editBox] = true
         editBox:HookScript("OnShow", FontApplier.applyToChatInput)
         editBox:HookScript("OnEditFocusGained", FontApplier.applyToChatInput)
     end
@@ -192,8 +249,8 @@ FontApplier.TOOLTIP_NAMES = { "GameTooltip", "ItemRefTooltip", "ShoppingTooltip1
 function FontApplier.hookTooltip()
     for _, tipName in ipairs(FontApplier.TOOLTIP_NAMES) do
         local tip = _G[tipName]
-        if tip and tip.Show and not tip.ezFontTooltipHooked then
-            tip.ezFontTooltipHooked = true
+        if tip and tip.Show and not hookedTooltips[tip] then
+            hookedTooltips[tip] = true
             -- OnShow alone misses updates while the tooltip remains visible.
             hooksecurefunc(tip, "Show", FontApplier.applyToTooltip)
         end
@@ -221,6 +278,7 @@ function ns:ApplyTarget(targetKey)
         for _, chatFrame in ipairs(FontApplier.chatFrames()) do
             pcall(FontApplier.applyToChatFrame, chatFrame, entry)
         end
+        pcall(FontApplier.noteChatFonts)
     end
     if targetKey == "ui" or targetKey == "chat" then FontApplier.refreshChatInputs() end
     if targetKey == "ui" and self:TargetConfig("tooltip").font == "inherit" then self:ApplyTarget("tooltip") end
@@ -308,6 +366,40 @@ function FontApplier.scheduleRescan()
     end)
 end
 
+-- Chat windows are never followed by hooking the default chat functions
+-- (opening a whisper window, changing the font size, activating chat input):
+-- those run in the middle of the default whisper handling, and a hook there
+-- breaks it. Instead this addon's own frame listens for the whisper and chat
+-- window events and re-applies the chat font on the next frame.
+local pendingChatApply = false
+function FontApplier.queueChatApply()
+    if pendingChatApply or not ns.db then return end
+    pendingChatApply = true
+    C_Timer.After(0, function()
+        pendingChatApply = false
+        ns:ApplyTarget("chat")
+    end)
+end
+
+local chatWatcher = CreateFrame("Frame")
+for _, eventName in ipairs({ "CHAT_MSG_WHISPER", "CHAT_MSG_WHISPER_INFORM", "CHAT_MSG_BN_WHISPER",
+        "CHAT_MSG_BN_WHISPER_INFORM", "UPDATE_CHAT_WINDOWS" }) do
+    pcall(chatWatcher.RegisterEvent, chatWatcher, eventName)
+end
+chatWatcher:SetScript("OnEvent", function()
+    if FontApplier.loggedIn then FontApplier.queueChatApply() end
+end)
+
+-- Notices a size picked in the chat tab menu (which sends no event).
+function FontApplier.startChatFontWatch()
+    if FontApplier.chatFontTicker or not (C_Timer and C_Timer.NewTicker) then return end
+    FontApplier.chatFontTicker = C_Timer.NewTicker(1, function()
+        if pendingChatApply or not ns.db or not ns:TargetFontEntry("chat") then return end
+        local isCallOk, changed = pcall(FontApplier.chatFontsChanged)
+        if isCallOk and changed then FontApplier.queueChatApply() end
+    end)
+end
+
 local eventFrame = CreateFrame("Frame")
 eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
@@ -326,17 +418,11 @@ eventFrame:SetScript("OnEvent", function(_, event, loadedName)
         ns:RegisterSharedFonts()   -- in case the shared font library loaded after us
         FontApplier.hookTooltip()
         if ns.RegisterBlizzardOptions then ns:RegisterBlizzardOptions() end
+        FontApplier.watchChatInputs()
         FontApplier.collectFontObjects()
         ns:ApplyAll()
-        if FCF_SetChatWindowFontSize then
-            hooksecurefunc("FCF_SetChatWindowFontSize", function() ns:ApplyTarget("chat") end)
-        end
-        if FCF_OpenTemporaryWindow then
-            hooksecurefunc("FCF_OpenTemporaryWindow", function() ns:ApplyTarget("chat") end)
-        end
-        if ChatEdit_ActivateChat then
-            hooksecurefunc("ChatEdit_ActivateChat", FontApplier.applyToChatInput)
-        end
+        FontApplier.loggedIn = true
+        FontApplier.startChatFontWatch()
         local driver = _G.NamePlateDriverFrame
         if driver and driver.UpdateNamePlateOptions then
             hooksecurefunc(driver, "UpdateNamePlateOptions", function() ns:ApplyTarget("nameplate") end)
