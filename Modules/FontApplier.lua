@@ -88,9 +88,21 @@ function FontApplier.applyToObject(fontObject, entry, scale, targetKey)
     elseif entry and entry.family then
         path = ns:FamilyPrimaryPath(targetKey)
     end
-    if path then fontObject:SetFont(path, size, saved.flags) end
+    -- A Font object raises an error for a file that was removed from the folder
+    if path and not pcall(fontObject.SetFont, fontObject, path, size, saved.flags) then
+        pcall(fontObject.SetFont, fontObject, saved.path, size, saved.flags)
+    end
     local appliedPath, appliedSize = fontObject:GetFont()
     appliedFonts[fontObject] = { path = appliedPath or path, size = appliedSize or size }
+end
+
+-- A chat frame, like a FontString, only takes a font file the client has
+-- already loaded: load it first when the plain call does not take it.
+function FontApplier.setChatFont(chatFrame, path, size, flags)
+    if not path then return end
+    if chatFrame:SetFont(path, size, flags) == false and ns:IsFontFileUsable(path) then
+        chatFrame:SetFont(path, size, flags)
+    end
 end
 
 -- Chat frames keep the size the player picked in the chat tab menu
@@ -104,10 +116,10 @@ function FontApplier.applyToChatFrame(chatFrame, entry)
     if ns:UsesFamily(entry) then
         local family = ns:GetFamilyFont("chat", currentSize, currentFlags, entry)
         if family and ns:SetFontObjectKeepLook(chatFrame, family) then return end
-        chatFrame:SetFont(entry.family and ns:FamilyPrimaryPath("chat") or entry.path, currentSize, currentFlags)
+        FontApplier.setChatFont(chatFrame, entry.family and ns:FamilyPrimaryPath("chat") or entry.path, currentSize, currentFlags)
         return
     end
-    chatFrame:SetFont(entry and entry.path or saved.path, currentSize, currentFlags)
+    FontApplier.setChatFont(chatFrame, entry and entry.path or saved.path, currentSize, currentFlags)
 end
 
 -- Last font seen on each chat frame right after this addon set it. The chat
@@ -320,36 +332,20 @@ function ns:ResetAllTargets()
     self:Print(self:L("MSG_RESET"))
 end
 
--- true when the client can open the file. One probe FontString is reused:
--- it is first reset to the game's standard font, so a SetFont that fails
--- leaves that baseline in place and GetFont tells us whether the file loaded.
-local function normalizeFontPath(path)
-    return type(path) == "string" and path:gsub("/", "\\"):lower() or nil
-end
-
+-- true when the client can open the file, and loads it as a side effect.
+-- A FontString only accepts a font file the client has already loaded, so
+-- it cannot tell a new file from a missing one. A Font object loads the file
+-- when it exists and raises "file not found" when it does not; after that
+-- FontStrings and chat frames accept the same path too.
 function ns:IsFontFileUsable(path)
     if type(path) ~= "string" or path == "" then return false end
-    if not FontApplier.probeFrame then
-        FontApplier.probeFrame = CreateFrame("Frame", nil, UIParent)
-        FontApplier.probeFrame:Hide()
-    end
-    local probe = FontApplier.probeString
+    local probe = FontApplier.probeFont
     if not probe then
-        probe = FontApplier.probeFrame:CreateFontString(nil, "OVERLAY")
-        FontApplier.probeString = probe
+        probe = CreateFont("EzWoWFontChangerProbeFont")
+        FontApplier.probeFont = probe
     end
-    local baseline = originalGlobals.STANDARD_TEXT_FONT or STANDARD_TEXT_FONT
-    local baseLoaded = type(baseline) == "string" and pcall(probe.SetFont, probe, baseline, 12, "") and probe:GetFont()
-    if not baseLoaded then
-        -- Baseline unavailable: fall back to a fresh FontString (no font until SetFont succeeds)
-        local fresh = FontApplier.probeFrame:CreateFontString(nil, "OVERLAY")
-        local okCall, accepted = pcall(fresh.SetFont, fresh, path, 12, "")
-        return okCall and accepted ~= false and fresh:GetFont() ~= nil
-    end
-    if normalizeFontPath(path) == normalizeFontPath(baseline) then return true end
-    local okCall, accepted = pcall(probe.SetFont, probe, path, 12, "")
-    local loaded = probe:GetFont()
-    return okCall and accepted ~= false and loaded ~= nil and loaded ~= baseLoaded
+    local okCall = pcall(probe.SetFont, probe, path, 12, "")
+    return okCall and probe:GetFont() ~= nil
 end
 
 -----------------------------------------------------------------------------

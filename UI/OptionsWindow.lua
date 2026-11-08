@@ -94,7 +94,12 @@ function SettingsDialog.fontTip(entry)
 end
 
 function SettingsDialog.setFontSafely(fontString, path, size)
-    if not (path and pcall(fontString.SetFont, fontString, path, size, "") and fontString:GetFont()) then
+    if not path then fontString:SetFontObject(GameFontHighlight) return end
+    local function apply()
+        return pcall(fontString.SetFont, fontString, path, size, "") and fontString:GetFont() ~= nil
+    end
+    -- A font file the client has not loaded yet is loaded first, then retried
+    if not apply() and not (ns:IsFontFileUsable(path) and apply()) then
         fontString:SetFontObject(GameFontHighlight)
     end
 end
