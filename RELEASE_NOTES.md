@@ -1,9 +1,7 @@
-# v1.0.3
+# v1.0.4
 
 ### 한국어
-- 채팅 탭에서 글꼴 크기를 바꿔도 지정한 글꼴이 유지되도록 고쳤습니다.
-- 귓속말 창과 관련된 "애드온 동작 차단" 오류를 수정했습니다.
+- EzWoW-MyFonts 폴더에 넣은 내 글꼴을 찾지 못하던 문제를 수정했습니다.
 
 ### English
-- Your chosen font is now kept when the chat tab font size changes.
-- Fixed blocked-action errors related to whisper windows.
+- Fixed fonts in the EzWoW-MyFonts folder not being found.
