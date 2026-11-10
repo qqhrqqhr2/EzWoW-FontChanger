@@ -24,10 +24,12 @@
 ## Version: 1.0.4
 ## Category: EzWoW
 ## IconTexture: Interface\AddOns\EzWoW-FontChanger\Media\Icon
-## SavedVariables: EzWoW_FontChangerDB
+## SavedVariables: EzWoW_FontChangerDB, EzWoW_SharedData
 ## AddonCompartmentFunc: EzWoW_FontChanger_OnAddonCompartmentClick
 ## OptionalDeps: EzWoW-MyFonts
 
+Libs\EzWoWGamePad\GamePad.lua
+Libs\EzWoWShare\Share.lua
 Core\Init.lua
 Core\UIKit.lua
 Core\Locales.lua
