@@ -161,6 +161,7 @@ end
 -- frames would taint them.
 local hookedInputs = setmetatable({}, { __mode = "k" })
 local hookedTooltips = setmetatable({}, { __mode = "k" })
+local relayingOut = setmetatable({}, { __mode = "k" })   -- tooltip -> laying out again after a font change
 
 -- Only the edit boxes of the numbered chat windows (1-10) are ever watched.
 -- Whisper window edit boxes (11+) carry secret whisper targets; running addon
@@ -248,9 +249,24 @@ function FontApplier.applyToTooltip(tip)
         end
         FontApplier.applyToObject(region, entry, scale, "tooltip")
     end
+    local changed = false
+    local function applyAndCheck(region)
+        if not (region and region.GetFont) then return end
+        local path, size, flags = region:GetFont()
+        pcall(apply, region)
+        local newPath, newSize, newFlags = region:GetFont()
+        if newPath ~= path or newSize ~= size or newFlags ~= flags then changed = true end
+    end
     for index = 1, tip:NumLines() do
-        pcall(apply, _G[name .. "TextLeft" .. index])
-        pcall(apply, _G[name .. "TextRight" .. index])
+        pcall(applyAndCheck, _G[name .. "TextLeft" .. index])
+        pcall(applyAndCheck, _G[name .. "TextRight" .. index])
+    end
+    -- This runs after the tooltip has sized its lines. A wider font set here
+    -- would cut the lines short ("..."), so the tooltip lays them out once more.
+    if changed and not relayingOut[tip] and tip:IsShown() then
+        relayingOut[tip] = true
+        pcall(tip.Show, tip)
+        relayingOut[tip] = nil
     end
 end
 

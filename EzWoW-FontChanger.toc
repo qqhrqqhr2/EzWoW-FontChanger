@@ -20,6 +20,7 @@
 ## Notes-ruRU: Шрифты и размеры для интерфейса, чата, цифр боя и индикаторов (/ezfont)
 ## Notes-zhCN: 更改游戏界面、聊天、战斗数字与姓名板的字体和大小 (/ezfont)
 ## Notes-zhTW: 更改遊戲介面、聊天、戰鬥數字與名條的字型和大小 (/ezfont)
+## X-License: GPL-3.0
 ## Author: qqhrqqhr2
 ## Version: 1.0.5
 ## Category: EzWoW

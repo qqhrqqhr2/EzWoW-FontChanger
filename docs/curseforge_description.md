@@ -106,3 +106,9 @@ WoW Forever의 게임 화면을 다섯 영역(게임 UI, 채팅창, 툴팁, 전�
 - `/ezfont 진단` (`diag`) — 중국어가 어떻게 그려지는지 확인하는 창
 
 애드온을 업데이트하거나 글꼴 파일을 넣은 뒤에는 **게임을 완전히 껐다 켜세요.** `/reload`만 하면 예전 글꼴 파일이 계속 쓰입니다.
+
+---
+
+**Support:** If you find this addon useful, you can support its development. [Buy Me a Coffee ☕](https://buymeacoffee.com/qqhrqqhr2)
+
+**후원:** 애드온이 도움이 되셨다면 개발 후원으로 응원해 주세요. [Buy Me a Coffee ☕](https://buymeacoffee.com/qqhrqqhr2)
