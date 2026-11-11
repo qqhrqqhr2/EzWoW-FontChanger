@@ -1,7 +1,7 @@
-# v1.0.6
+# v1.0.7
 
 ### 한국어
-- 툴팁 글꼴을 바꾸면 주문 설명 같은 긴 줄이 "..."로 잘리던 문제를 고쳤습니다.
+- 다른 EzWoW 사용자와 기록을 주고받는 공유 기능이 동작하지 않던 문제를 수정했습니다.
 
 ### English
-- Fixed long tooltip lines such as spell descriptions being cut off with "..." when the tooltip font is changed.
+- Fixed data sharing with other EzWoW users not working.

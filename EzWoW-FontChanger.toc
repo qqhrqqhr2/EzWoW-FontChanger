@@ -22,7 +22,7 @@
 ## Notes-zhTW: 更改遊戲介面、聊天、戰鬥數字與名條的字型和大小 (/ezfont)
 ## X-License: GPL-3.0
 ## Author: qqhrqqhr2
-## Version: 1.0.6
+## Version: 1.0.7
 ## Category: EzWoW
 ## IconTexture: Interface\AddOns\EzWoW-FontChanger\Media\Icon
 ## SavedVariables: EzWoW_FontChangerDB, EzWoW_SharedData
