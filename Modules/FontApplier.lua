@@ -338,24 +338,41 @@ function ns:ApplyAll()
     for _, targetKey in ipairs(self.TARGET_ORDER) do self:ApplyTarget(targetKey) end
 end
 
+-- the file of the font chosen for an area (nil for the game's own font)
+local function chosenPath(targetKey)
+    local entry = ns:ResolveFont(ns:TargetConfig(targetKey).font)
+    return entry and (entry.family and ns:FamilyPrimaryPath(targetKey) or entry.path) or nil
+end
+
+-- Kept with the choice: a font another addon adds later in the load order is not
+-- known yet when the load-time globals are set below.
+function ns:RememberFontPath(targetKey)
+    self:TargetConfig(targetKey).path = chosenPath(targetKey)
+end
+
 -- Runs while this addon loads, before the world reads these globals.
 function FontApplier.applyLoadTimeGlobals()
     for targetKey, globalNames in pairs(LOAD_TIME_GLOBALS) do
         local cfg = ns:TargetConfig(targetKey)
-        local entry = ns:ResolveFont(cfg.font)
-        fontIdAtLoad[targetKey] = entry and cfg.font or "default"
+        local path = chosenPath(targetKey)
+        if not path and cfg.font and cfg.font ~= "default" and type(cfg.path) == "string" then path = cfg.path end
+        -- a font file that is gone (deleted, renamed) is not written in: the game font stays
+        if path and not ns:IsFontFileUsable(path) then path = nil end
+        fontIdAtLoad[targetKey] = path and cfg.font or "default"
         for _, globalName in ipairs(globalNames) do
             if originalGlobals[globalName] == nil then originalGlobals[globalName] = _G[globalName] or false end
-            if entry then _G[globalName] = entry.family and ns:FamilyPrimaryPath(targetKey) or entry.path end
+            if path then _G[globalName] = path end
         end
     end
 end
 
 -- Combat numbers and names above heads only pick up a new font after a relog
+-- (a chosen font whose file cannot be opened counts as the game font)
 function ns:NeedsRelog(targetKey)
     if targetKey ~= "combat" and targetKey ~= "nameplate" then return false end
     local cfg = self:TargetConfig(targetKey)
-    local current = self:ResolveFont(cfg.font) and cfg.font or "default"
+    local path = chosenPath(targetKey)
+    local current = (path and self:IsFontFileUsable(path)) and cfg.font or "default"
     return fontIdAtLoad[targetKey] ~= nil and fontIdAtLoad[targetKey] ~= current
 end
 
@@ -363,6 +380,7 @@ function ns:ResetAllTargets()
     for _, targetKey in ipairs(self.TARGET_ORDER) do
         local cfg = self:TargetConfig(targetKey)
         cfg.font, cfg.scale = self.DEFAULTS.targets[targetKey].font, 100
+        self:RememberFontPath(targetKey)
     end
     self:ApplyAll()
     if self.RefreshOptions then self:RefreshOptions() end
@@ -449,6 +467,11 @@ eventFrame:SetScript("OnEvent", function(_, event, loadedName)
         end
     elseif event == "PLAYER_LOGIN" then
         ns:RegisterSharedFonts()   -- in case the shared font library loaded after us
+        -- every addon has loaded now: keep the file of each chosen font (fonts other addons
+        -- add are known only now; the load-time globals of the next login use this path)
+        for targetKey in pairs(LOAD_TIME_GLOBALS) do
+            if chosenPath(targetKey) then ns:RememberFontPath(targetKey) end
+        end
         FontApplier.hookTooltip()
         if ns.RegisterBlizzardOptions then ns:RegisterBlizzardOptions() end
         FontApplier.watchChatInputs()

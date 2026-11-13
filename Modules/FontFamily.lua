@@ -63,6 +63,7 @@ function ns:ApplyMultilingualPreset()
     self:TargetConfig("chat").font = family and "family" or "bundled:worldsans"
     -- names above heads are drawn with one file only
     self:TargetConfig("nameplate").font = "bundled:worldsans"
+    for _, targetKey in ipairs({ "ui", "chat", "nameplate" }) do self:RememberFontPath(targetKey) end
     self:ApplyAll()
     if self.RefreshOptions then self:RefreshOptions() end
     self:Print(self:L("MSG_PRESET"))

@@ -64,10 +64,21 @@ local LOCALE_MASK = {   -- which client locales each alphabet serves (shared fon
     chinese = "LOCALE_BIT_zhCN",
 }
 
--- The shared font library other addons use (optional; looked up at runtime).
-local function sharedMedia()
-    local libStub = _G.LibStub
-    return libStub and libStub("LibSharedMedia-3.0", true)
+-- The shared font library other addons use (optional; looked up at runtime by
+-- what it can do: a registry of media lists with fetch and register).
+local sharedFontLib
+local function sharedFontLibrary()
+    if sharedFontLib then return sharedFontLib end
+    local stub = _G.LibStub
+    if not (type(stub) == "table" and type(stub.IterateLibraries) == "function") then return nil end
+    for _, lib in stub:IterateLibraries() do
+        if type(lib) == "table" and type(lib.Fetch) == "function" and type(lib.List) == "function"
+            and type(lib.Register) == "function" and type(lib.MediaType) == "table" and lib.MediaType.FONT then
+            sharedFontLib = lib
+            return lib
+        end
+    end
+    return nil
 end
 
 -- Every selectable font: { id, name, path, file?, source, multilingual? }
@@ -83,7 +94,7 @@ function ns:FontCatalog()
     for _, custom in ipairs(self:CustomFontFiles()) do
         list[#list + 1] = { id = "custom:" .. custom.file, name = (custom.file:gsub("%.[OoTt][Tt][Ff]$", "")), path = self:CustomFontPath(custom.file), source = "custom", auto = custom.auto }
     end
-    local media = sharedMedia()
+    local media = sharedFontLibrary()
     if media and media.List then
         local seen = {}
         for _, entry in ipairs(list) do seen[(entry.path or ""):lower()] = true end
@@ -101,7 +112,7 @@ end
 -- Lets other addons that use the shared font library pick the bundled
 -- fonts in their own font menus.
 function ns:RegisterSharedFonts()
-    local media = sharedMedia()
+    local media = sharedFontLibrary()
     if not (media and media.Register) or self.sharedFontsRegistered then return end
     self.sharedFontsRegistered = true
     for _, font in ipairs(self.BUNDLED_FONTS) do

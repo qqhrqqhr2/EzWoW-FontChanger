@@ -96,7 +96,9 @@ end
 function SettingsDialog.setFontSafely(fontString, path, size)
     if not path then fontString:SetFontObject(GameFontHighlight) return end
     local function apply()
-        return pcall(fontString.SetFont, fontString, path, size, "") and fontString:GetFont() ~= nil
+        -- SetFont answers false for a file the client has not loaded yet (it keeps the old font)
+        local ok, accepted = pcall(fontString.SetFont, fontString, path, size, "")
+        return ok and accepted ~= false and fontString:GetFont() ~= nil
     end
     -- A font file the client has not loaded yet is loaded first, then retried
     if not apply() and not (ns:IsFontFileUsable(path) and apply()) then
@@ -243,6 +245,7 @@ function SettingsDialog.openTargetPicker(targetKey, anchor)
         selectedId = ns:TargetConfig(targetKey).font,
         onSelect = function(fontId)
             ns:TargetConfig(targetKey).font = fontId
+            ns:RememberFontPath(targetKey)
             ns:ApplyTarget(targetKey)
         end,
     })
@@ -251,6 +254,7 @@ end
 function SettingsDialog.applyFontToAll(fontId)
     for _, targetKey in ipairs(ns.TARGET_ORDER) do
         ns:TargetConfig(targetKey).font = fontId
+        ns:RememberFontPath(targetKey)
         ns:ApplyTarget(targetKey)
     end
     ns:RefreshOptions()
@@ -475,7 +479,7 @@ function SettingsDialog.removeCustomFont(file)
     for _, targetKey in ipairs(ns.TARGET_ORDER) do
         local cfg = ns:TargetConfig(targetKey)
         if cfg.font == "custom:" .. removed.file then
-            cfg.font = "default"
+            cfg.font, cfg.path = "default", nil
             ns:ApplyTarget(targetKey)
         end
     end
