@@ -257,10 +257,31 @@ function FontApplier.applyToTooltip(tip)
         local newPath, newSize, newFlags = region:GetFont()
         if newPath ~= path or newSize ~= size or newFlags ~= flags then changed = true end
     end
-    for index = 1, tip:NumLines() do
-        pcall(applyAndCheck, _G[name .. "TextLeft" .. index])
-        pcall(applyAndCheck, _G[name .. "TextRight" .. index])
+    -- The "EzWoW - <addon>" name lines are drawn small on purpose (their own
+    -- font object): no size of ours on them, and one put there before goes
+    local function isNameLine(region, index, right)
+        local text = region and region.GetText and region:GetText()
+        if type(text) ~= "string" or (issecretvalue and issecretvalue(text)) then return false end
+        return text:find("^EzWoW %- ") ~= nil and (right or index > 1)
     end
+    local function keepNameLine(region)
+        local object = region.GetFontObject and region:GetFontObject()
+        if not (object and object.GetFont) then return end
+        local path, size = region:GetFont()
+        local objectPath, objectSize = object:GetFont()
+        if path ~= objectPath or size ~= objectSize then
+            region:SetFontObject(object)
+            changed = true
+        end
+    end
+    for index = 1, tip:NumLines() do
+        local left, right = _G[name .. "TextLeft" .. index], _G[name .. "TextRight" .. index]
+        if isNameLine(left, index, false) then pcall(keepNameLine, left) else pcall(applyAndCheck, left) end
+        if isNameLine(right, index, true) then pcall(keepNameLine, right) else pcall(applyAndCheck, right) end
+    end
+    -- the name lines' small size (shared by the EzWoW addons) set once more
+    local sizer = _G.EzWoWTooltipTagSizer
+    if sizer and sizer.Refit then pcall(sizer.Refit, tip) end
     -- This runs after the tooltip has sized its lines. A wider font set here
     -- would cut the lines short ("..."), so the tooltip lays them out once more.
     if changed and not relayingOut[tip] and tip:IsShown() then

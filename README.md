@@ -20,11 +20,9 @@ WoW Forever (`Interface: 16001`) · `v1.0.3` · `/ezfont`
 
 ### 화면 미리보기
 
-![글꼴 비교와 기본 글꼴 22종](docs/images/ui_ko.png)
+![설정창](docs/images/ui_ko.png)
 
-![설정창과 추가 설정](docs/images/settings_ko.png)
-
-> 이미지는 애드온 코드의 창 크기·좌표·색상·문구와 실제 포함 글꼴로 재현한 **예시 화면**입니다. 채팅 내용과 이름은 지어낸 예시입니다.
+> 실제 게임 화면입니다(WoW Forever, 한국어 클라이언트). 캐릭터 · 다른 플레이어 이름과 채팅 내용은 가렸습니다.
 
 ### 설정창 (`/ezfont`)
 
@@ -135,11 +133,9 @@ Changes the font and size of five parts of the game separately: the game UI, cha
 | Combat numbers | Damage and healing numbers above heads | After a relog |
 | Nameplates & names above heads | Nameplates, names above characters and creatures | Nameplates at once, names above heads after a relog |
 
-![Font comparison and the 22 bundled fonts](docs/images/ui_en.png)
+![Settings window](docs/images/ui_en.png)
 
-![Settings window and More settings](docs/images/settings_en.png)
-
-> The images are **example screens** recreated from the addon's window sizes, positions, colors, text and the bundled fonts. Chat lines and names are made up.
+> In-game screenshots (WoW Forever, Korean client). Character and player names and chat text are blurred.
 
 **Settings window** (`/ezfont`, also from the game's *Settings → AddOns → EzWoW - Font Changer* page and the minimap addon menu):
 
