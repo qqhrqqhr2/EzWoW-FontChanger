@@ -135,7 +135,7 @@ Changes the font and size of five parts of the game separately: the game UI, cha
 
 ![Settings window](docs/images/ui_en.png)
 
-> In-game screenshots (WoW Forever, Korean client). Character and player names and chat text are blurred.
+> In-game screenshots with the addon set to English. The game client is Korean, so game text such as zone, item and spell names stays Korean. Character and player names and chat text are blurred.
 
 **Settings window** (`/ezfont`, also from the game's *Settings → AddOns → EzWoW - Font Changer* page and the minimap addon menu):
 
